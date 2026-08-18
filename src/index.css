@@ -1,0 +1,113 @@
+@import "tailwindcss";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* ---------------------------------------------------------------------------
+   Self-hosted variable faces. Downloaded from Fontshare, served from /public
+   so there is no third-party font request at runtime.
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Clash Display";
+  src: url("/fonts/ClashDisplay-Variable.woff2") format("woff2-variations");
+  font-weight: 200 700;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi-Variable.woff2") format("woff2-variations");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* ---------------------------------------------------------------------------
+   Tokens.
+
+   Theme: dark-locked by intent. This is a dark-tech portfolio; the palette is
+   the brand, so there is no light variant to drift out of sync.
+
+   Accent: a single amber. It is the only chromatic colour on the page. Status
+   green appears exactly once, on a real availability flag, and nowhere else.
+
+   Radius rule (documented so it stays consistent):
+     - interactive controls (buttons, pills) .... fully rounded
+     - containers (cards, media, inputs) ....... 12px
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-bg: #08090c;
+  --color-surface: #0e1015;
+  --color-surface-2: #14171e;
+  --color-line: #1e222b;
+  --color-line-bright: #2b313d;
+  --color-text: #e8eaee;
+  --color-muted: #8a9099;
+  --color-dim: #5c626c;
+  --color-accent: #ffb020;
+  --color-accent-dim: #b57a14;
+  --color-live: #34d399;
+
+  --font-display: "Clash Display", "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --radius-container: 12px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Numbers and code carry the mono face wherever they appear. */
+  .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  /* Fixed, pointer-events-none grain. Never on a scrolling container. */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
