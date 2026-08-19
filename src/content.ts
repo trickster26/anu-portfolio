@@ -59,13 +59,15 @@ export type Project = {
   detail: string;
   stack: string[];
   link?: { label: string; href: string };
-  /** Drop a real screenshot at this path in /public. See README for sizes. */
   /**
-   * Omit for work that has no interface to photograph. The card then runs as
-   * type alone rather than holding an empty frame open forever.
+   * Path to a real screenshot in /public/work. Omit for work that has no
+   * interface to photograph: the card then runs as type alone rather than
+   * holding an empty frame open forever.
    */
   image?: string;
   imageAlt?: string;
+  /** Shown under the image when the shot needs a word of explanation. */
+  imageCaption?: string;
 };
 
 export const projects: Project[] = [
@@ -90,7 +92,8 @@ export const projects: Project[] = [
       "Provisioning creates the tenant database, runs industry-specific migrations, starts a dedicated backend process, and writes the DNS record. Feature access is gated per industry and plan, so one codebase serves verticals that do not resemble each other.",
     stack: ["Node.js", "Express", "MariaDB", "React", "PM2", "Cloudflare"],
     image: "/work/napcrm.jpg",
-    imageAlt: "NapCRM tenant administration dashboard",
+    imageAlt: "Storefront of Verma Industries, a live NapCRM tenant",
+    imageCaption: "A live tenant: verma-industries.in",
   },
   {
     id: "adnosaur",

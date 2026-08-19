@@ -17,45 +17,55 @@ import { projects, type Project } from "../content";
 function ProjectMedia({
   src,
   alt,
+  caption,
   className = "",
 }: {
   src: string;
   alt: string;
+  caption?: string;
   className?: string;
 }) {
   const [state, setState] = useState<"loading" | "loaded" | "missing">("loading");
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-[12px] border border-line bg-surface-2 ${className}`}
-    >
-      {state === "missing" ? (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 py-12 text-center">
-          <ImageIcon size={20} weight="light" className="text-dim" aria-hidden="true" />
-          <span className="tabular text-[11px] leading-relaxed text-dim">{src}</span>
-        </div>
-      ) : (
-        <>
-          {state === "loading" && (
-            <div
-              className="absolute inset-0 animate-pulse bg-surface-2"
-              aria-hidden="true"
+    <figure>
+      <div
+        className={`relative overflow-hidden rounded-[12px] border border-line bg-surface-2 ${className}`}
+      >
+        {state === "missing" ? (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+            <ImageIcon size={20} weight="light" className="text-dim" aria-hidden="true" />
+            <span className="tabular text-[11px] leading-relaxed text-dim">{src}</span>
+          </div>
+        ) : (
+          <>
+            {state === "loading" && (
+              <div
+                className="absolute inset-0 animate-pulse bg-surface-2"
+                aria-hidden="true"
+              />
+            )}
+            <img
+              src={src}
+              alt={alt}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setState("loaded")}
+              onError={() => setState("missing")}
+              className={`h-full w-full object-cover transition-opacity duration-700 ${
+                state === "loaded" ? "opacity-100" : "opacity-0"
+              }`}
             />
-          )}
-          <img
-            src={src}
-            alt={alt}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setState("loaded")}
-            onError={() => setState("missing")}
-            className={`h-full w-full object-cover transition-opacity duration-700 ${
-              state === "loaded" ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        </>
+          </>
+        )}
+      </div>
+
+      {caption && state === "loaded" && (
+        <figcaption className="tabular mt-3 text-[11px] tracking-[0.04em] text-dim">
+          {caption}
+        </figcaption>
       )}
-    </div>
+    </figure>
   );
 }
 
@@ -128,7 +138,12 @@ export function Work() {
           </Reveal>
 
           <Reveal as="article" className="md:col-span-5" delay={0.08} distance={20}>
-            <ProjectMedia src={tall.image!} alt={tall.imageAlt ?? tall.name} className="aspect-[4/5]" />
+            <ProjectMedia
+              src={tall.image!}
+              alt={tall.imageAlt ?? tall.name}
+              caption={tall.imageCaption}
+              className="aspect-[4/5]"
+            />
             <div className="pt-7">
               <ProjectHeading project={tall} />
               <p className="mt-3 text-[15px] leading-relaxed text-text">{tall.summary}</p>
