@@ -116,7 +116,7 @@ export function Work() {
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-12">
           {/* Row one: the current work takes the wider cell. */}
           <Reveal as="article" className="md:col-span-7" distance={20}>
-            <ProjectMedia src={lead.image} alt={lead.imageAlt} className="aspect-[16/10]" />
+            <ProjectMedia src={lead.image!} alt={lead.imageAlt ?? lead.name} className="aspect-[16/10]" />
             <div className="pt-7">
               <ProjectHeading project={lead} />
               <p className="mt-3 text-[15px] leading-relaxed text-text">{lead.summary}</p>
@@ -128,7 +128,7 @@ export function Work() {
           </Reveal>
 
           <Reveal as="article" className="md:col-span-5" delay={0.08} distance={20}>
-            <ProjectMedia src={tall.image} alt={tall.imageAlt} className="aspect-[4/5]" />
+            <ProjectMedia src={tall.image!} alt={tall.imageAlt ?? tall.name} className="aspect-[4/5]" />
             <div className="pt-7">
               <ProjectHeading project={tall} />
               <p className="mt-3 text-[15px] leading-relaxed text-text">{tall.summary}</p>
@@ -142,8 +142,8 @@ export function Work() {
           {/* Row two reverses the weighting so the grid does not fall into a rhythm. */}
           <Reveal as="article" className="md:col-span-5 md:pt-8" distance={20}>
             <ProjectMedia
-              src={adnosaur.image}
-              alt={adnosaur.imageAlt}
+              src={adnosaur.image!}
+              alt={adnosaur.imageAlt ?? adnosaur.name}
               className="aspect-[3/2]"
             />
             <div className="pt-7">
@@ -158,7 +158,7 @@ export function Work() {
           </Reveal>
 
           <Reveal as="article" className="md:col-span-7 md:pt-8" delay={0.08} distance={20}>
-            <ProjectMedia src={napseo.image} alt={napseo.imageAlt} className="aspect-[16/9]" />
+            <ProjectMedia src={napseo.image!} alt={napseo.imageAlt ?? napseo.name} className="aspect-[16/9]" />
             <div className="pt-7">
               <ProjectHeading project={napseo} />
               <p className="mt-3 text-[15px] leading-relaxed text-text">{napseo.summary}</p>
@@ -176,12 +176,22 @@ export function Work() {
             distance={20}
           >
             <div className="grid grid-cols-1 gap-8 border-t border-line pt-10 md:grid-cols-12 md:items-center">
-              <ProjectMedia
-                src={wide.image}
-                alt={wide.imageAlt}
-                className="aspect-[16/9] md:col-span-5"
-              />
-              <div className="md:col-span-6 md:col-start-7">
+              {wide.image && (
+                <ProjectMedia
+                  src={wide.image}
+                  alt={wide.imageAlt ?? wide.name}
+                  className="aspect-[16/9] md:col-span-5"
+                />
+              )}
+              {/* A trained model has no interface to show. Without media the card
+                  runs as type across the grid instead of holding a frame open. */}
+              <div
+                className={
+                  wide.image
+                    ? "md:col-span-6 md:col-start-7"
+                    : "md:col-span-7 md:col-start-1"
+                }
+              >
                 <ProjectHeading project={wide} />
                 <p className="mt-3 text-[15px] leading-relaxed text-text">{wide.summary}</p>
                 <p className="mt-3 max-w-[54ch] text-[14px] leading-relaxed text-muted">

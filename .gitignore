@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Persistent browser profile used by scripts/capture-work.mjs
+.capture-profile

@@ -14,8 +14,7 @@ npm run preview  # serve the built output
 
 ### 1. Project screenshots (required)
 
-Five slots render a labelled placeholder until the file exists. Drop real
-captures at these paths:
+Four slots render a labelled placeholder until the file exists:
 
 | File | Aspect | Suggested size |
 | --- | --- | --- |
@@ -23,22 +22,22 @@ captures at these paths:
 | `public/work/napcrm.jpg` | 4:5 | 1200 x 1500 |
 | `public/work/adnosaur.jpg` | 3:2 | 1400 x 933 |
 | `public/work/napseo.jpg` | 16:9 | 1600 x 900 |
-| `public/work/covix.jpg` | 16:9 | 1600 x 900 |
 
-Capture on a dark UI where possible so they sit inside the page rather than
-punching a white hole in it. Export at roughly 80% JPEG quality; anything over
-about 300KB per image is wasted on this layout.
+Covix has no slot on purpose. It is a trained model with no interface, so its
+card runs as type alone rather than holding an empty frame open.
+
+`npm run capture` opens a visible browser at each app, waits while you sign in,
+then captures at the right aspect and writes into `public/work/` for you. Run
+`npm run capture napcrm` to redo a single one. Logins persist in
+`.capture-profile/` between runs.
+
+Capture on a dark UI where possible so the shots sit inside the page rather than
+punching a white hole in it.
 
 ### 2. Social preview image
 
 `public/og.jpg` at 1200 x 630. Referenced by the Open Graph and Twitter card
 tags in `index.html`. Without it, links unfurl with no image.
-
-### 3. Product naming
-
-The multi-tenant CRM is written as **NapCRM** throughout, taken from the most
-recent naming in the monorepo. If the public-facing name differs, it appears in
-`src/content.ts` only (`projects[1]` and `tenancy.body`).
 
 ## Where things live
 

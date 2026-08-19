@@ -60,8 +60,12 @@ export type Project = {
   stack: string[];
   link?: { label: string; href: string };
   /** Drop a real screenshot at this path in /public. See README for sizes. */
-  image: string;
-  imageAlt: string;
+  /**
+   * Omit for work that has no interface to photograph. The card then runs as
+   * type alone rather than holding an empty frame open forever.
+   */
+  image?: string;
+  imageAlt?: string;
 };
 
 export const projects: Project[] = [
@@ -97,7 +101,9 @@ export const projects: Project[] = [
     detail:
       "Full-stack build on React and Node with a FastAPI service alongside it. Integrated the OpenAI realtime API so users could interrogate the catalogue conversationally instead of filtering it.",
     stack: ["React", "Node.js", "PostgreSQL", "FastAPI", "AWS", "OpenAI"],
-    link: { label: "app.adnosaur.com", href: "https://app.adnosaur.com/" },
+    // app.adnosaur.com was returning 502 as of 2026-08-19. Restore this line
+    // once the host is up again:
+    // link: { label: "app.adnosaur.com", href: "https://app.adnosaur.com/" },
     image: "/work/adnosaur.jpg",
     imageAlt: "Adnosaur product discovery interface",
   },
@@ -121,8 +127,6 @@ export const projects: Project[] = [
     detail:
       "Trained end to end: dataset preparation, augmentation, architecture selection, and evaluation. The early project that made the case for everything after it.",
     stack: ["Python", "CNN", "Computer vision", "Deep learning"],
-    image: "/work/covix.jpg",
-    imageAlt: "Covix chest X-ray classification output",
   },
 ];
 
