@@ -17,7 +17,7 @@ export const person = {
   location: "Mohali, Punjab, India",
   github: "https://github.com/trickster26",
   githubHandle: "trickster26",
-  linkedin: "https://www.linkedin.com/in/anu-kumar",
+  linkedin: "https://www.linkedin.com/in/anukumar0",
 };
 
 export const hero = {

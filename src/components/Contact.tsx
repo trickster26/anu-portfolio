@@ -10,7 +10,7 @@ import { contact, person } from "../content";
 const CHANNELS = [
   { label: person.email, href: `mailto:${person.email}`, Icon: EnvelopeSimpleIcon },
   { label: `github.com/${person.githubHandle}`, href: person.github, Icon: GithubLogoIcon },
-  { label: "linkedin.com/in/anu-kumar", href: person.linkedin, Icon: LinkedinLogoIcon },
+  { label: "linkedin.com/in/anukumar0", href: person.linkedin, Icon: LinkedinLogoIcon },
 ];
 
 export function Contact() {
