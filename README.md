@@ -91,18 +91,26 @@ builds, and publishes `dist/`. There is also a manual trigger in the Actions tab
 One-time setup on the repo:
 
 1. Settings > Pages > Build and deployment > Source: **GitHub Actions**.
-2. Settings > Pages > Custom domain: `anukumar.qd.je`, then Save.
+2. Settings > Pages > Custom domain: `anukumar.site`, then Save.
 3. Tick **Enforce HTTPS** once the certificate is issued (can take a few minutes).
 
-DNS, at the DigitalPlat panel for `anukumar.qd.je`:
+DNS, in the GoDaddy panel for `anukumar.site`. GoDaddy does not support a CNAME at
+the apex, so the root is served by GitHub's four anycast A records:
 
 | Type | Name | Value |
 | --- | --- | --- |
-| CNAME | `anukumar` (or `@`, depending on how the panel scopes it) | `trickster26.github.io` |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `trickster26.github.io` |
 
-If the panel refuses a CNAME at that name, use four A records to `185.199.108.153`,
-`185.199.109.153`, `185.199.110.153`, `185.199.111.153` instead. Optionally add
-AAAA records to `2606:50c0:8000::153` through `2606:50c0:8003::153` for IPv6.
+Two records that ship with the domain have to go first: the parked `A @` record,
+and the `CNAME www` pointing back at `anukumar.site`. Both conflict with the rows
+above. Leave the NS, SOA, `_domainconnect`, and `_dmarc` records alone.
+
+Optionally add AAAA records at `@` for `2606:50c0:8000::153` through
+`2606:50c0:8003::153` so the site answers over IPv6 as well.
 
 Note there is deliberately no `public/CNAME` file. GitHub ignores it when the site
 publishes from a custom Actions workflow; the domain lives in repo settings.
