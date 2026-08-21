@@ -19,18 +19,23 @@ function ProjectMedia({
   alt,
   caption,
   className = "",
+  aspect = "",
 }: {
   src: string;
   alt: string;
   caption?: string;
+  /** Layout classes for the figure itself: grid placement, margins. */
   className?: string;
+  /** Aspect ratio for the frame. Kept off the figure so the caption is
+      not counted inside the ratio. */
+  aspect?: string;
 }) {
   const [state, setState] = useState<"loading" | "loaded" | "missing">("loading");
 
   return (
-    <figure>
+    <figure className={className}>
       <div
-        className={`relative overflow-hidden rounded-[12px] border border-line bg-surface-2 ${className}`}
+        className={`relative overflow-hidden rounded-[12px] border border-line bg-surface-2 ${aspect}`}
       >
         {state === "missing" ? (
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 py-12 text-center">
@@ -123,100 +128,96 @@ export function Work() {
           </h2>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-12">
-          {/* Row one: the current work takes the wider cell. */}
-          <Reveal as="article" className="md:col-span-7" distance={20}>
-            <ProjectMedia src={lead.image!} alt={lead.imageAlt ?? lead.name} className="aspect-[16/10]" />
-            <div className="pt-7">
-              <ProjectHeading project={lead} />
-              <p className="mt-3 text-[15px] leading-relaxed text-text">{lead.summary}</p>
-              <p className="mt-3 max-w-[54ch] text-[14px] leading-relaxed text-muted">
-                {lead.detail}
-              </p>
-              <StackRow items={lead.stack} />
-            </div>
-          </Reveal>
+        {/* The current work opens alone. Nothing sits beside it, so the column
+            cannot leave a hole where an image would otherwise have gone. */}
+        <Reveal as="article" className="mt-14 max-w-[64ch]" distance={20}>
+          <ProjectHeading project={lead} />
+          <p className="mt-4 text-[17px] leading-relaxed text-text">{lead.summary}</p>
+          <p className="mt-4 text-[14px] leading-relaxed text-muted">{lead.detail}</p>
+          <StackRow items={lead.stack} />
+          <ProjectLink project={lead} />
+        </Reveal>
 
-          <Reveal as="article" className="md:col-span-5" delay={0.08} distance={20}>
+        {/* The one project with something real to photograph gets the picture. */}
+        <Reveal
+          as="article"
+          className="mt-16 grid grid-cols-1 gap-10 border-t border-line pt-16 md:grid-cols-12 md:items-center"
+          distance={20}
+        >
+          {tall.image && (
             <ProjectMedia
-              src={tall.image!}
+              src={tall.image}
               alt={tall.imageAlt ?? tall.name}
               caption={tall.imageCaption}
-              className="aspect-[4/5]"
+              className="md:col-span-5"
+              aspect="aspect-[4/5]"
             />
-            <div className="pt-7">
-              <ProjectHeading project={tall} />
-              <p className="mt-3 text-[15px] leading-relaxed text-text">{tall.summary}</p>
-              <p className="mt-3 max-w-[46ch] text-[14px] leading-relaxed text-muted">
-                {tall.detail}
-              </p>
-              <StackRow items={tall.stack} />
-            </div>
-          </Reveal>
+          )}
+          <div className={tall.image ? "md:col-span-6 md:col-start-7" : "md:col-span-8"}>
+            <ProjectHeading project={tall} />
+            <p className="mt-4 text-[17px] leading-relaxed text-text">{tall.summary}</p>
+            <p className="mt-4 max-w-[52ch] text-[14px] leading-relaxed text-muted">
+              {tall.detail}
+            </p>
+            <StackRow items={tall.stack} />
+            <ProjectLink project={tall} />
+          </div>
+        </Reveal>
 
-          {/* Row two reverses the weighting so the grid does not fall into a rhythm. */}
-          <Reveal as="article" className="md:col-span-5 md:pt-8" distance={20}>
-            <ProjectMedia
-              src={adnosaur.image!}
-              alt={adnosaur.imageAlt ?? adnosaur.name}
-              className="aspect-[3/2]"
-            />
-            <div className="pt-7">
-              <ProjectHeading project={adnosaur} />
-              <p className="mt-3 text-[15px] leading-relaxed text-text">{adnosaur.summary}</p>
-              <p className="mt-3 max-w-[46ch] text-[14px] leading-relaxed text-muted">
-                {adnosaur.detail}
-              </p>
-              <StackRow items={adnosaur.stack} />
-              <ProjectLink project={adnosaur} />
-            </div>
-          </Reveal>
-
-          <Reveal as="article" className="md:col-span-7 md:pt-8" delay={0.08} distance={20}>
-            <ProjectMedia src={napseo.image!} alt={napseo.imageAlt ?? napseo.name} className="aspect-[16/9]" />
-            <div className="pt-7">
-              <ProjectHeading project={napseo} />
-              <p className="mt-3 text-[15px] leading-relaxed text-text">{napseo.summary}</p>
-              <p className="mt-3 max-w-[54ch] text-[14px] leading-relaxed text-muted">
-                {napseo.detail}
-              </p>
-              <StackRow items={napseo.stack} />
-            </div>
-          </Reveal>
-
-          {/* Row three: the oldest project lies down, horizontal, as a closing note. */}
-          <Reveal
-            as="article"
-            className="md:col-span-12 md:pt-10"
-            distance={20}
-          >
-            <div className="grid grid-cols-1 gap-8 border-t border-line pt-10 md:grid-cols-12 md:items-center">
-              {wide.image && (
+        {/* Two of equal weight, side by side. */}
+        <div className="mt-16 grid grid-cols-1 gap-x-10 gap-y-14 border-t border-line pt-16 md:grid-cols-12">
+          {[adnosaur, napseo].map((project, i) => (
+            <Reveal
+              key={project.id}
+              as="article"
+              className="md:col-span-6"
+              delay={i * 0.08}
+              distance={20}
+            >
+              {project.image && (
                 <ProjectMedia
-                  src={wide.image}
-                  alt={wide.imageAlt ?? wide.name}
-                  className="aspect-[16/9] md:col-span-5"
+                  src={project.image}
+                  alt={project.imageAlt ?? project.name}
+                  caption={project.imageCaption}
+                  className="mb-7"
+                  aspect="aspect-[3/2]"
                 />
               )}
-              {/* A trained model has no interface to show. Without media the card
-                  runs as type across the grid instead of holding a frame open. */}
-              <div
-                className={
-                  wide.image
-                    ? "md:col-span-6 md:col-start-7"
-                    : "md:col-span-7 md:col-start-1"
-                }
-              >
-                <ProjectHeading project={wide} />
-                <p className="mt-3 text-[15px] leading-relaxed text-text">{wide.summary}</p>
-                <p className="mt-3 max-w-[54ch] text-[14px] leading-relaxed text-muted">
-                  {wide.detail}
-                </p>
-                <StackRow items={wide.stack} />
-              </div>
-            </div>
-          </Reveal>
+              <ProjectHeading project={project} />
+              <p className="mt-4 text-[15px] leading-relaxed text-text">{project.summary}</p>
+              <p className="mt-3 max-w-[50ch] text-[14px] leading-relaxed text-muted">
+                {project.detail}
+              </p>
+              <StackRow items={project.stack} />
+              <ProjectLink project={project} />
+            </Reveal>
+          ))}
         </div>
+
+        {/* The oldest project closes the section as a single quiet line of type. */}
+        <Reveal as="article" className="mt-16 border-t border-line pt-16" distance={20}>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-12 md:items-baseline">
+            {wide.image && (
+              <ProjectMedia
+                src={wide.image}
+                alt={wide.imageAlt ?? wide.name}
+                caption={wide.imageCaption}
+                className="md:col-span-4"
+                aspect="aspect-[16/9]"
+              />
+            )}
+            <div className={wide.image ? "md:col-span-7 md:col-start-6" : "md:col-span-5"}>
+              <ProjectHeading project={wide} />
+              <p className="mt-4 text-[15px] leading-relaxed text-text">{wide.summary}</p>
+            </div>
+            <div className={wide.image ? "md:col-span-12" : "md:col-span-6 md:col-start-7"}>
+              <p className="max-w-[50ch] text-[14px] leading-relaxed text-muted">
+                {wide.detail}
+              </p>
+              <StackRow items={wide.stack} />
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

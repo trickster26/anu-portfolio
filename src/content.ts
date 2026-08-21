@@ -79,8 +79,9 @@ export const projects: Project[] = [
     detail:
       "Core contributor to the agent runtime: reasoning and tool-calling workflows, confidence scoring on generated output, and human-approval checkpoints before an agent action commits. The retrieval side grounds those decisions in company data rather than model priors.",
     stack: ["Python", "FastAPI", "LLM agents", "RAG", "Docker", "Kubernetes"],
-    image: "/work/supermanager.jpg",
-    imageAlt: "SuperManager agent workflow interface",
+    // Behind a login. Restore once npm run capture supermanager has been run:
+    // image: "/work/supermanager.jpg",
+    // imageAlt: "SuperManager agent workflow interface",
   },
   {
     id: "napcrm",
@@ -107,8 +108,9 @@ export const projects: Project[] = [
     // app.adnosaur.com was returning 502 as of 2026-08-19. Restore this line
     // once the host is up again:
     // link: { label: "app.adnosaur.com", href: "https://app.adnosaur.com/" },
-    image: "/work/adnosaur.jpg",
-    imageAlt: "Adnosaur product discovery interface",
+    // The host is down, so there is nothing to photograph. Restore with:
+    // image: "/work/adnosaur.jpg",
+    // imageAlt: "Adnosaur product discovery interface",
   },
   {
     id: "napseo",
@@ -119,8 +121,10 @@ export const projects: Project[] = [
     detail:
       "Separate agents handle audit, keyword research, content briefs, and internal linking, each with its own tools and output contract. Multi-project, so one workspace can hold unrelated sites without the agents bleeding context across them.",
     stack: ["Node.js", "React", "LLM agents", "PostgreSQL"],
-    image: "/work/napseo.jpg",
-    imageAlt: "NapSEO agent command centre",
+    // Runs locally only and needs a database that is not on this machine.
+    // Restore once npm run capture napseo has been run:
+    // image: "/work/napseo.jpg",
+    // imageAlt: "NapSEO agent command centre",
   },
   {
     id: "covix",
