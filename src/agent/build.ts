@@ -137,7 +137,11 @@ export function routesJson(): string {
     {
       version: 1,
       include: ["/*"],
-      exclude: ["/assets/*", "/fonts/*", "/work/*", "/favicon.svg", "/og.jpg", "/*.md", "/*.txt", "/*.xml"],
+      // Static media and the hashed bundle can never be negotiated and are
+      // never indexed on their own, so they skip the worker entirely. The .md
+      // and .txt documents stay in: they are cheap, and on a preview host the
+      // middleware is what stamps them noindex.
+      exclude: ["/assets/*", "/fonts/*", "/work/*", "/favicon.svg", "/og.jpg"],
     },
     null,
     2,

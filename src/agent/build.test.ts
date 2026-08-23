@@ -300,9 +300,13 @@ describe("agentArtifacts", () => {
     expect(routes.include).toEqual(["/*"]);
     expect(routes.exclude).toContain("/assets/*");
     expect(routes.exclude).toContain("/fonts/*");
-    // The .md files are served directly; running the negotiator on them would
-    // only re-fetch what the client already asked for by path.
-    expect(routes.exclude).toContain("/*.md");
+    expect(routes.exclude).toContain("/og.jpg");
+  });
+
+  it("keeps the text documents on the middleware, so a preview host can noindex them", () => {
+    const routes = JSON.parse(routesJson()) as { exclude: string[] };
+    expect(routes.exclude).not.toContain("/*.md");
+    expect(routes.exclude).not.toContain("/*.txt");
   });
 
   it("pins the content type of the markdown twins for the CDN", () => {

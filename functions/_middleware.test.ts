@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MARKDOWN_PATHS, onRequest } from "./_middleware";
+import { INDEXABLE_HOSTS, isNoindexHost, MARKDOWN_PATHS, onRequest } from "./_middleware";
 
 /**
  * A stand-in for the Pages asset store. It knows the four markdown twins, the
@@ -37,6 +37,15 @@ function makeContext(url: string, init: RequestInit = {}) {
         return new Response("<!doctype html><html><body>page</body></html>", {
           status: 200,
           headers: { "Content-Type": "text/html; charset=utf-8", Vary: "accept-encoding" },
+        });
+      }
+
+      // Pages serves the twins straight off disk when they are asked for by
+      // path, so the middleware sees a 200 markdown response, not a 404.
+      if ((MARKDOWN_PATHS as readonly string[]).includes(path)) {
+        return new Response(`# markdown for ${path}\n`, {
+          status: 200,
+          headers: { "Content-Type": "text/markdown; charset=utf-8" },
         });
       }
 
@@ -150,5 +159,85 @@ describe("HTML responses", () => {
     await onRequest(context);
 
     expect(served).toEqual([]);
+  });
+});
+
+describe("isNoindexHost", () => {
+  it("lets the real domain and its www through", () => {
+    for (const host of INDEXABLE_HOSTS) expect(isNoindexHost(host)).toBe(false);
+  });
+
+  it("ignores case, since Host headers are not normalised", () => {
+    expect(isNoindexHost("ANUKumar.site")).toBe(false);
+  });
+
+  it("catches the project preview host", () => {
+    expect(isNoindexHost("anu-portfolio.pages.dev")).toBe(true);
+  });
+
+  it("catches a per-deployment preview host", () => {
+    expect(isNoindexHost("4391142.anu-portfolio.pages.dev")).toBe(true);
+  });
+
+  it("catches a lookalike that merely ends with the real domain", () => {
+    expect(isNoindexHost("evil-anukumar.site")).toBe(true);
+    expect(isNoindexHost("anukumar.site.example.com")).toBe(true);
+  });
+
+  it("catches local development", () => {
+    expect(isNoindexHost("127.0.0.1")).toBe(true);
+    expect(isNoindexHost("localhost")).toBe(true);
+  });
+});
+
+describe("preview hosts are kept out of search indexes", () => {
+  const PREVIEW = "https://anu-portfolio.pages.dev";
+
+  it("stamps noindex on an HTML page", async () => {
+    const { context } = makeContext(`${PREVIEW}/`);
+    const response = await onRequest(context);
+
+    expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
+    // The negotiation headers still have to be right on a preview host, or
+    // there is no way to test the real thing before switching DNS.
+    expect(response.headers.get("Vary")).toContain("Accept");
+  });
+
+  it("stamps noindex on a negotiated markdown response", async () => {
+    const { context } = makeContext(`${PREVIEW}/about`, { headers: MARKDOWN_ACCEPT });
+    const response = await onRequest(context);
+
+    expect(response.headers.get("Content-Type")).toBe("text/markdown; charset=utf-8");
+    expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
+  });
+
+  it("stamps noindex on a markdown twin fetched by path", async () => {
+    const { context } = makeContext(`${PREVIEW}/about.md`);
+    const response = await onRequest(context);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/markdown");
+    expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
+  });
+
+  it("stamps noindex on the 404", async () => {
+    const { context } = makeContext(`${PREVIEW}/nope`);
+    const response = await onRequest(context);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("X-Robots-Tag")).toBe("noindex, nofollow, noarchive");
+  });
+
+  it("adds nothing on the real domain", async () => {
+    for (const path of ["/", "/about", "/nope"]) {
+      const { context } = makeContext(`https://anukumar.site${path}`);
+      const response = await onRequest(context);
+      expect(response.headers.get("X-Robots-Tag")).toBeNull();
+    }
+  });
+
+  it("adds nothing to a markdown response on the real domain", async () => {
+    const { context } = makeContext("https://anukumar.site/", { headers: MARKDOWN_ACCEPT });
+    expect((await onRequest(context)).headers.get("X-Robots-Tag")).toBeNull();
   });
 });
