@@ -8,6 +8,7 @@ npm install
 npm run dev      # http://localhost:5173
 npm run build    # -> dist/
 npm run preview  # serve the built output
+npm test         # vitest, covers everything under src/agent and functions/
 ```
 
 ## What still needs you
@@ -39,6 +40,42 @@ punching a white hole in it.
 `public/og.jpg` at 1200 x 630. Referenced by the Open Graph and Twitter card
 tags in `index.html`. Without it, links unfurl with no image.
 
+## Agent readiness
+
+The page is React, but agents are not going to run it. Everything an AI crawler
+or answer engine needs exists in the raw HTML, generated at build time by
+`src/agent/plugin.ts` from the same `src/content.ts` the components render — so
+the machine-readable copy cannot drift from the human one.
+
+What ships beside the app:
+
+| File | What it is |
+| --- | --- |
+| `index.html` | The homepage text is inlined inside `#root` before any JS runs. React replaces it on first render; an inline `data-js` flag hides it first, so a browser never flashes it. ~5,300 characters and one `<h1>` with JavaScript disabled. |
+| `about.html`, `contact.html`, `privacy.html` | Trust-anchor pages. Static, no React, same stylesheet as the app. Served at `/about` with no redirect hop. |
+| `<page>.md` | A markdown twin of every page, including `404.md`. |
+| `llms.txt` | Per llmstxt.org, with a **When to use this site** section naming the jobs the site is right for and how to call it. |
+| `llms-full.txt` | Every page concatenated, for agents that prefer one fetch. |
+| `sitemap.xml`, `robots.txt` | Generated, so they cannot list a page that does not exist. |
+| `_headers`, `_routes.json` | Cloudflare Pages config. Ignored by GitHub Pages. |
+| `404.html` | Real 404 status on both hosts, with a body that links the sitemap, llms.txt and every real page. |
+
+`functions/_middleware.ts` implements acceptmarkdown.com content negotiation:
+`Accept: text/markdown` on any page returns the markdown twin with
+`Vary: Accept`, and HTML responses advertise their twin with a `Link` header.
+**It only runs on Cloudflare Pages.** GitHub Pages cannot execute code, so on
+GitHub the `.md` files are reachable by path but never negotiated. Verify a
+deploy with:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" https://anukumar.site/no-such-path   # 404
+curl -sI -H "Accept: text/markdown" https://anukumar.site/ | grep -i "content-type\|vary"
+```
+
+Editing `src/content.ts` or `src/agent/pages.ts` regenerates all of it. The
+tests in `src/agent/*.test.ts` and `functions/_middleware.test.ts` assert the
+exact bytes, and CI runs them before every deploy.
+
 ## Where things live
 
 ```
@@ -48,11 +85,16 @@ src/
   three/
     AgentGraph.tsx       hero scene: agent runtime as a live graph
     TenantLattice.tsx    systems section: isolated tenant cells
+  agent/                 machine-readable build: markdown twins, llms.txt,
+                         static pages, 404, sitemap, robots, the Vite plugin
   index.css              design tokens (@theme), fonts, base layer
+functions/
+  _middleware.ts         Cloudflare Pages markdown content negotiation
 public/fonts/            self-hosted Clash Display + Satoshi variable faces
 ```
 
-Editing copy means editing `src/content.ts`. Nothing else holds strings.
+Editing copy means editing `src/content.ts`. Nothing else holds strings, except
+`src/agent/pages.ts`, which holds the about/contact/privacy prose.
 
 ## Design decisions worth keeping
 
@@ -116,3 +158,20 @@ Note there is deliberately no `public/CNAME` file. GitHub ignores it when the si
 publishes from a custom Actions workflow; the domain lives in repo settings.
 
 The repo must be **public** for Pages to serve it on a free GitHub account.
+
+### Moving to Cloudflare Pages
+
+Markdown content negotiation needs a server, so it is dark on GitHub Pages. To
+turn it on: create a Cloudflare Pages project from this repo (build command
+`npm run build`, output directory `dist`), add `anukumar.site` as a custom
+domain, then repoint the GoDaddy apex from GitHub's A records to the CNAME
+Cloudflare gives you. `functions/`, `_headers` and `_routes.json` are already in
+place and take effect on the first Cloudflare deploy with no code change.
+
+Test it locally before switching anything:
+
+```bash
+npm run build
+npx wrangler pages dev dist
+curl -sI -H "Accept: text/markdown" http://127.0.0.1:8788/
+```

@@ -1,5 +1,14 @@
 import { person } from "../content";
 
+// The trust-anchor pages live outside the single-page app. They are linked from
+// here so a crawler following the homepage actually reaches them, and so a
+// person looking for a privacy statement finds one where they expect to.
+const PAGES = [
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Privacy", href: "/privacy" },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-line py-10">
@@ -7,6 +16,19 @@ export function Footer() {
         <p className="font-display text-[15px] font-medium tracking-tight text-text">
           {person.name}
         </p>
+
+        <nav aria-label="Site" className="flex items-center gap-4">
+          {PAGES.map((page) => (
+            <a
+              key={page.href}
+              href={page.href}
+              className="text-[13px] text-dim transition-colors hover:text-text"
+            >
+              {page.label}
+            </a>
+          ))}
+        </nav>
+
         <p className="text-[13px] text-dim">
           {person.role}. {person.location}.
         </p>

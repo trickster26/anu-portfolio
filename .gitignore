@@ -25,3 +25,6 @@ dist-ssr
 
 # Persistent browser profile used by scripts/capture-work.mjs
 .capture-profile
+
+# wrangler pages dev scratch (local Cloudflare Functions runtime)
+.wrangler/

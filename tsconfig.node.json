@@ -7,7 +7,10 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "module": "nodenext",
+    /* Bundler resolution: vite.config.ts now imports the agent-ready plugin
+       from src/, which is written for the app's extensionless bundler style. */
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",

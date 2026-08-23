@@ -33,6 +33,11 @@ jobs:
 
       - run: npx tsc -b --noEmit
 
+      # The agent-readiness artefacts (llms.txt, the .md twins, the 404 body,
+      # the no-JS homepage) are generated at build time, so their tests are the
+      # only thing standing between a bad edit and a silently degraded site.
+      - run: npm test
+
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

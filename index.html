@@ -57,52 +57,86 @@
       crossorigin
     />
 
+    <!--
+      One graph rather than two loose nodes, so every page on the site can point
+      at @id anchors instead of restating the identity. Person is the primary
+      entity: this is a personal site, not a company one.
+    -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Anu Kumar",
-        "url": "https://anukumar.site/",
-        "image": "https://anukumar.site/og.jpg",
-        "jobTitle": "Senior AI Engineer",
-        "worksFor": {
-          "@type": "Organization",
-          "name": "SuperManager AGI"
-        },
-        "alumniOf": {
-          "@type": "CollegeOrUniversity",
-          "name": "I.K.G. Punjab Technical University"
-        },
-        "email": "mailto:anu2614kumar@gmail.com",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Mohali",
-          "addressRegion": "Punjab",
-          "addressCountry": "IN"
-        },
-        "sameAs": [
-          "https://github.com/trickster26",
-          "https://www.linkedin.com/in/anukumar0"
-        ],
-        "knowsAbout": [
-          "AI agents",
-          "Large language models",
-          "Retrieval-augmented generation",
-          "Python",
-          "FastAPI",
-          "React"
+        "@graph": [
+          {
+            "@type": "Person",
+            "@id": "https://anukumar.site/#person",
+            "name": "Anu Kumar",
+            "givenName": "Anu",
+            "familyName": "Kumar",
+            "description": "Senior AI Engineer in Mohali, Punjab, India. Builds LLM agents, retrieval pipelines, and the production infrastructure around them: tool-calling loops, confidence scoring, human-approval gates, and the FastAPI, Node, PostgreSQL and Kubernetes systems that keep them running.",
+            "url": "https://anukumar.site/",
+            "mainEntityOfPage": "https://anukumar.site/",
+            "image": "https://anukumar.site/og.jpg",
+            "jobTitle": "Senior AI Engineer",
+            "email": "mailto:anu2614kumar@gmail.com",
+            "knowsLanguage": "en",
+            "worksFor": {
+              "@type": "Organization",
+              "name": "SuperManager AGI"
+            },
+            "alumniOf": {
+              "@type": "CollegeOrUniversity",
+              "name": "I.K.G. Punjab Technical University"
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Mohali",
+              "addressRegion": "Punjab",
+              "addressCountry": "IN"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "Professional enquiries",
+              "email": "anu2614kumar@gmail.com",
+              "url": "https://anukumar.site/contact",
+              "availableLanguage": ["en"],
+              "areaServed": "Worldwide"
+            },
+            "sameAs": [
+              "https://github.com/trickster26",
+              "https://www.linkedin.com/in/anukumar0"
+            ],
+            "knowsAbout": [
+              "AI agents",
+              "Large language models",
+              "Retrieval-augmented generation",
+              "Multi-tenant SaaS architecture",
+              "Python",
+              "FastAPI",
+              "React"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://anukumar.site/#website",
+            "url": "https://anukumar.site/",
+            "name": "Anu Kumar, Senior AI Engineer",
+            "description": "Portfolio and professional record of Anu Kumar, a Senior AI Engineer working on LLM agents, retrieval pipelines, and the infrastructure around them.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://anukumar.site/#person" },
+            "author": { "@id": "https://anukumar.site/#person" }
+          },
+          {
+            "@type": "ProfilePage",
+            "@id": "https://anukumar.site/#profilepage",
+            "url": "https://anukumar.site/",
+            "name": "Anu Kumar, Senior AI Engineer",
+            "description": "Selected work, experience, capabilities and contact details for Anu Kumar.",
+            "isPartOf": { "@id": "https://anukumar.site/#website" },
+            "mainEntity": { "@id": "https://anukumar.site/#person" },
+            "primaryImageOfPage": "https://anukumar.site/og.jpg",
+            "dateModified": "2026-08-23"
+          }
         ]
-      }
-    </script>
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "url": "https://anukumar.site/",
-        "name": "Anu Kumar, Senior AI Engineer",
-        "inLanguage": "en",
-        "author": { "@type": "Person", "name": "Anu Kumar" }
       }
     </script>
   </head>
