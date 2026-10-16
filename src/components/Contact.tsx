@@ -49,12 +49,12 @@ export function Contact() {
           <Reveal delay={0.14} className="lg:col-span-4 lg:col-start-9 lg:pt-3">
             <ul className="flex flex-col">
               {CHANNELS.map(({ label, href, Icon }) => (
-                <li key={href} className="border-t border-line py-5">
+                <li key={href} className="border-t border-line">
                   <a
                     href={href}
                     target={href.startsWith("mailto:") ? undefined : "_blank"}
                     rel="noreferrer noopener"
-                    className="group flex items-center gap-3 text-[14px] text-muted transition-colors hover:text-text"
+                    className="group flex min-h-11 items-center gap-3 py-5 text-[14px] text-muted transition-colors hover:text-text"
                   >
                     <Icon size={16} weight="regular" className="shrink-0 text-dim" aria-hidden="true" />
                     <span className="break-all">{label}</span>

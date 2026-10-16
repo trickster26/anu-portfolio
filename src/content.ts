@@ -68,6 +68,8 @@ export type Project = {
   imageAlt?: string;
   /** Shown under the image when the shot needs a word of explanation. */
   imageCaption?: string;
+  /** For work with nothing to photograph: the path one request takes through it. */
+  flow?: { step: string; body: string }[];
 };
 
 export const projects: Project[] = [
@@ -79,6 +81,14 @@ export const projects: Project[] = [
     detail:
       "Core contributor to the agent runtime: reasoning and tool-calling workflows, confidence scoring on generated output, and human-approval checkpoints before an agent action commits. The retrieval side grounds those decisions in company data rather than model priors.",
     stack: ["Python", "FastAPI", "LLM agents", "RAG", "Docker", "Kubernetes"],
+    flow: [
+      { step: "Reason", body: "The agent plans the next step from the task and its context." },
+      { step: "Ground", body: "Retrieval pulls the company data the decision has to rest on." },
+      { step: "Call tools", body: "Enterprise tools and databases are queried or updated." },
+      { step: "Score", body: "Generated output gets a confidence score before anything moves." },
+      { step: "Approve", body: "Low-confidence or high-impact actions wait for a person." },
+      { step: "Commit", body: "Only then does the action execute." },
+    ],
     // Behind a login. Restore once npm run capture supermanager has been run:
     // image: "/work/supermanager.jpg",
     // imageAlt: "SuperManager agent workflow interface",
@@ -242,7 +252,7 @@ export const education = {
 };
 
 export const contact = {
-  headline: "Working on something that needs an agent layer?",
+  headline: "Hiring for agent or LLM work?",
   body: "Open to senior AI engineering roles, and to problems where the model is the easy part. The fastest way to reach me is email.",
   cta: { label: "Get in touch", href: "mailto:anu2614kumar@gmail.com" },
 };

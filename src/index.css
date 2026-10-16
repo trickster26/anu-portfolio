@@ -42,7 +42,7 @@
   --color-line-bright: #2b313d;
   --color-text: #e8eaee;
   --color-muted: #8a9099;
-  --color-dim: #5c626c;
+  --color-dim: #7d838d; /* 5.2:1 on bg, 4.7:1 on surface-2: AA at 11px */
   --color-accent: #ffb020;
   --color-accent-dim: #b57a14;
   --color-live: #34d399;

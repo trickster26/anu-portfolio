@@ -123,19 +123,56 @@ export function Work() {
     <section id="work" className="border-t border-line py-24 sm:py-32">
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
         <Reveal>
-          <h2 className="max-w-[20ch] font-display text-[clamp(1.9rem,3.6vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.025em] text-text">
-            Five things I built and had to keep running.
+          <h2 className="max-w-[24ch] font-display text-[clamp(1.9rem,3.6vw,2.9rem)] font-semibold leading-[1.08] tracking-[-0.025em] text-text">
+            Five things I built, from agent runtimes to tenant databases.
           </h2>
         </Reveal>
 
-        {/* The current work opens alone. Nothing sits beside it, so the column
-            cannot leave a hole where an image would otherwise have gone. */}
-        <Reveal as="article" className="mt-14 max-w-[64ch]" distance={20}>
-          <ProjectHeading project={lead} />
-          <p className="mt-4 text-[17px] leading-relaxed text-text">{lead.summary}</p>
-          <p className="mt-4 text-[14px] leading-relaxed text-muted">{lead.detail}</p>
-          <StackRow items={lead.stack} />
-          <ProjectLink project={lead} />
+        {/* The current work has no screen to show, so the right column carries the
+            path one agent action takes instead of an image. */}
+        <Reveal
+          as="article"
+          className="mt-14 grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-10"
+          distance={20}
+        >
+          <div className="md:col-span-6">
+            <ProjectHeading project={lead} />
+            <p className="mt-4 text-[17px] leading-relaxed text-text">{lead.summary}</p>
+            <p className="mt-4 max-w-[58ch] text-[14px] leading-relaxed text-muted">
+              {lead.detail}
+            </p>
+            <StackRow items={lead.stack} />
+            <ProjectLink project={lead} />
+          </div>
+
+          {lead.flow && (
+            <ol
+              aria-label="Path of one agent action"
+              className="border-l border-line-bright md:col-span-5 md:col-start-8"
+            >
+              {lead.flow.map(({ step, body }, i) => {
+                const last = i === lead.flow!.length - 1;
+                return (
+                  <li key={step} className="relative pb-6 pl-6 last:pb-0">
+                    <span
+                      aria-hidden="true"
+                      className={`absolute -left-[4.5px] top-[0.55em] h-2 w-2 rounded-full ${
+                        last ? "bg-accent" : "border border-line-bright bg-bg"
+                      }`}
+                    />
+                    <p
+                      className={`font-display text-base font-medium tracking-tight ${
+                        last ? "text-accent" : "text-text"
+                      }`}
+                    >
+                      {step}
+                    </p>
+                    <p className="mt-1 text-[14px] leading-relaxed text-muted">{body}</p>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
         </Reveal>
 
         {/* The one project with something real to photograph gets the picture. */}

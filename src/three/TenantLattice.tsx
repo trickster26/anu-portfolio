@@ -9,7 +9,7 @@
 
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useMotionValue, useReducedMotion } from "motion/react";
+import { useInView, useMotionValue, useReducedMotion } from "motion/react";
 import * as THREE from "three";
 
 const COLS = 7;
@@ -133,7 +133,10 @@ function Lattice({
 }
 
 export default function TenantLattice() {
+  const wrapper = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion() ?? false;
+  // Only animate while the section is on screen.
+  const inView = useInView(wrapper);
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
 
@@ -146,6 +149,7 @@ export default function TenantLattice() {
 
   return (
     <div
+      ref={wrapper}
       className="absolute inset-0"
       aria-hidden="true"
       onPointerMove={handlePointerMove}
@@ -158,6 +162,7 @@ export default function TenantLattice() {
         camera={{ position: [0, 0, 10], fov: 40 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        frameloop={reduced || !inView ? "demand" : "always"}
         style={{ background: "transparent" }}
       >
         <Lattice pointerX={pointerX} pointerY={pointerY} reduced={reduced} />

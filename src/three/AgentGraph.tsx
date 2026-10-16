@@ -19,7 +19,7 @@
 
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMotionValue, useReducedMotion, useScroll, type MotionValue } from "motion/react";
+import { useInView, useMotionValue, useReducedMotion, useScroll, type MotionValue } from "motion/react";
 import * as THREE from "three";
 
 type NodeSpec = {
@@ -352,6 +352,8 @@ export default function AgentGraph() {
   const wrapper = useRef<HTMLDivElement>(null);
   const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const reduced = useReducedMotion() ?? false;
+  // Stop the render loop once the hero scrolls away; it costs GPU for nothing.
+  const inView = useInView(wrapper);
 
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
@@ -387,7 +389,7 @@ export default function AgentGraph() {
         camera={{ position: [0, 0, 9.4], fov: 45 }}
         dpr={[1, 1.75]}
         gl={{ antialias: false, alpha: true, powerPreference: "high-performance" }}
-        frameloop={reduced ? "demand" : "always"}
+        frameloop={reduced || !inView ? "demand" : "always"}
         style={{ background: "transparent" }}
       >
         <GraphScene
@@ -408,7 +410,7 @@ export default function AgentGraph() {
             ref={(element) => {
               labelRefs.current[slot] = element;
             }}
-            className="tabular absolute left-0 top-0 whitespace-nowrap pl-3 text-[10px] tracking-[0.16em] text-muted opacity-0 will-change-transform"
+            className="tabular absolute left-0 top-0 -mt-[0.6em] whitespace-nowrap pl-5 text-[10px] tracking-[0.16em] text-muted opacity-0 will-change-transform [text-shadow:0_0_6px_var(--color-bg),0_0_12px_var(--color-bg)]"
           >
             {node.label}
           </span>

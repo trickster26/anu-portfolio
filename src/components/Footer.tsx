@@ -17,12 +17,12 @@ export function Footer() {
           {person.name}
         </p>
 
-        <nav aria-label="Site" className="flex items-center gap-4">
+        <nav aria-label="Site" className="-mx-2 flex items-center">
           {PAGES.map((page) => (
             <a
               key={page.href}
               href={page.href}
-              className="text-[13px] text-dim transition-colors hover:text-text"
+              className="inline-flex min-h-11 items-center px-2 text-[13px] text-dim transition-colors hover:text-text"
             >
               {page.label}
             </a>

@@ -19,16 +19,8 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[100dvh] items-center overflow-hidden pt-24 pb-16"
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden pt-28 pb-10 md:flex-row md:items-center md:pt-24 md:pb-16"
     >
-      {/* The graph occupies the right of the composition on desktop and sits
-          behind the text, at low opacity, on small screens. */}
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-full opacity-45 [mask-image:radial-gradient(ellipse_at_center,black_58%,transparent_88%)] md:w-[58%] md:opacity-100">
-        <Suspense fallback={null}>
-          <AgentGraph />
-        </Suspense>
-      </div>
-
       <div className="relative mx-auto w-full max-w-[1400px] px-5 sm:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div className="md:col-span-6 lg:col-span-5">
@@ -74,6 +66,14 @@ export function Hero() {
             </motion.div>
           </div>
         </div>
+      </div>
+
+      {/* Desktop: the graph takes the right of the composition. Mobile: it gets
+          its own block under the copy instead of sitting faintly behind it. */}
+      <div className="pointer-events-none relative h-[44vh] w-full [mask-image:radial-gradient(ellipse_at_center,black_58%,transparent_88%)] md:absolute md:inset-y-0 md:right-0 md:h-auto md:w-[58%]">
+        <Suspense fallback={null}>
+          <AgentGraph />
+        </Suspense>
       </div>
 
       <div id="nav-sentinel" className="absolute bottom-0 h-px w-full" aria-hidden="true" />
