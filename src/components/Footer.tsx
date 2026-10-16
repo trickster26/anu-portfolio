@@ -4,6 +4,7 @@ import { person } from "../content";
 // here so a crawler following the homepage actually reaches them, and so a
 // person looking for a privacy statement finds one where they expect to.
 const PAGES = [
+  { label: "Writing", href: "/writing" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
   { label: "Privacy", href: "/privacy" },

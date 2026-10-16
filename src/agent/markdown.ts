@@ -36,6 +36,10 @@ function renderBlock(block: Block): string {
       return block.items.map((item) => `- **${item.term}:** ${item.description}`).join("\n");
     case "code":
       return "```\n" + block.text + "\n```";
+    case "posts":
+      return block.items
+        .map((item) => `- [${item.title}](${url(item.href)}) (${item.date}): ${item.description}`)
+        .join("\n");
   }
 }
 

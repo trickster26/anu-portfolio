@@ -5,7 +5,8 @@
  * the tests can assert on the exact bytes that ship.
  */
 
-import { agentPages } from "./pages";
+import { agentPages, posts } from "./pages";
+import { escapeHtml } from "./html";
 import {
   SITE_ORIGIN,
   homeMarkdown,
@@ -48,6 +49,35 @@ export function sitemapXml(): string {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls}
 </urlset>
+`;
+}
+
+/** RSS 2.0 feed of the posts, newest first. */
+export function rssXml(): string {
+  const items = posts
+    .map((post) => {
+      const date = new Date(`${post.published ?? post.updated}T09:00:00+05:30`).toUTCString();
+      return `    <item>
+      <title>${escapeHtml(post.title)}</title>
+      <link>${url(post.path)}</link>
+      <guid isPermaLink="true">${url(post.path)}</guid>
+      <pubDate>${date}</pubDate>
+      <description>${escapeHtml(post.description)}</description>
+    </item>`;
+    })
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Anu Kumar: Writing</title>
+    <link>${url("/writing")}</link>
+    <atom:link href="${url("/rss.xml")}" rel="self" type="application/rss+xml" />
+    <description>Posts on AI agents, RAG, multi-agent systems and LLM evaluation.</description>
+    <language>en</language>
+${items}
+  </channel>
+</rss>
 `;
 }
 
@@ -173,6 +203,7 @@ export function agentArtifacts(assets: Assets): Artifact[] {
   artifacts.push({ fileName: "llms.txt", source: llmsTxt() });
   artifacts.push({ fileName: "llms-full.txt", source: llmsFullTxt() });
   artifacts.push({ fileName: "sitemap.xml", source: sitemapXml() });
+  artifacts.push({ fileName: "rss.xml", source: rssXml() });
   artifacts.push({ fileName: "robots.txt", source: robotsTxt() });
   artifacts.push({ fileName: "_headers", source: headersFile() });
   artifacts.push({ fileName: "_routes.json", source: routesJson() });

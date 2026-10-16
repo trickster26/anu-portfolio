@@ -97,6 +97,7 @@ function shell(options: {
     <meta name="twitter:image" content="${escapeHtml(options.image ?? `${SITE_ORIGIN}/og.jpg`)}" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="${escapeHtml(person.name)}: Writing" href="/rss.xml" />
     ${FONT_PRELOADS}
     ${styles}
 
@@ -163,6 +164,13 @@ function renderBlockHtml(block: Block): string {
             `<div class="border-t border-line py-4"><dt class="font-mono text-[12px] uppercase tracking-[0.14em] text-dim">${escapeHtml(item.term)}</dt><dd class="mt-2 text-[15px] leading-relaxed text-muted">${linkify(item.description)}</dd></div>`,
         )
         .join("")}</dl>`;
+    case "posts":
+      return `<ul class="mt-6 max-w-[72ch]">${block.items
+        .map(
+          (item) =>
+            `<li class="border-t border-line py-6"><a class="group block" href="${escapeHtml(item.href)}"><span class="block font-display text-[1.3rem] font-semibold leading-snug tracking-[-0.015em] text-text group-hover:text-accent">${escapeHtml(item.title)}</span><span class="mt-2 block text-[15px] leading-relaxed text-muted">${escapeHtml(item.description)}</span><time class="mt-3 block font-mono text-[12px] text-dim" datetime="${escapeHtml(item.date)}">${escapeHtml(item.date)}</time></a></li>`,
+        )
+        .join("")}</ul>`;
     case "code":
       // Wraps rather than scrolls: a native scrollbar on a dark page is the loudest thing on it.
       return `<div class="mt-6 max-w-[68ch]"><pre class="whitespace-pre-wrap break-words rounded-[12px] border border-line bg-surface p-4 font-mono text-[13px] leading-relaxed text-text"><code>${escapeHtml(block.text)}</code></pre></div>`;
@@ -190,7 +198,13 @@ function pageStructuredData(page: AgentPage): unknown[] {
   }
 
   const type =
-    page.path === "/about" ? "AboutPage" : page.path === "/contact" ? "ContactPage" : "WebPage";
+    page.path === "/about"
+      ? "AboutPage"
+      : page.path === "/contact"
+        ? "ContactPage"
+        : page.path === "/writing"
+          ? "CollectionPage"
+          : "WebPage";
 
   return [
     {

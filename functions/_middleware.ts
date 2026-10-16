@@ -23,6 +23,7 @@ export const MARKDOWN_PATHS = [
   "/about.md",
   "/contact.md",
   "/privacy.md",
+  "/writing.md",
   "/writing/multi-tenant-architecture.md",
   "/writing/human-in-the-loop-ai-agents.md",
   "/writing/agentic-ai-tool-design.md",

@@ -47,6 +47,14 @@ export function Tenancy() {
                 </a>
               </li>
             ))}
+            <li className="border-t border-line">
+              <a
+                href="/writing"
+                className="flex min-h-11 items-center py-2 text-[15px] text-accent transition-colors hover:text-text"
+              >
+                All writing
+              </a>
+            </li>
           </ul>
         </Reveal>
 

@@ -16,7 +16,8 @@ export type Block =
   | { kind: "p"; text: string }
   | { kind: "list"; items: string[] }
   | { kind: "definitions"; items: { term: string; description: string }[] }
-  | { kind: "code"; text: string };
+  | { kind: "code"; text: string }
+  | { kind: "posts"; items: { title: string; href: string; description: string; date: string }[] };
 
 export type Section = { heading: string; blocks: Block[] };
 
@@ -861,10 +862,48 @@ export const evalsPost: AgentPage = {
   ],
 };
 
+/** Newest first. Every post also lands in the sitemap, RSS and llms-full.txt. */
+export const posts: AgentPage[] = [
+  evalsPost,
+  multiAgentPost,
+  ragPost,
+  toolsPost,
+  approvalPost,
+  tenancyPost,
+];
+
+export const writingIndex: AgentPage = {
+  path: "/writing",
+  markdownPath: "/writing.md",
+  title: "Writing on AI agents, RAG and LLM engineering",
+  heading: "Writing",
+  description:
+    "Posts by Anu Kumar on AI agents, RAG retrieval, multi-agent systems, LLM evaluation and the infrastructure around them.",
+  lede: "Notes on building agent systems, retrieval and the infrastructure that keeps them running. General engineering material, written from practice. New posts also go out by RSS at /rss.xml.",
+  updated: "2026-10-16",
+  sections: [
+    {
+      heading: "Posts",
+      blocks: [
+        {
+          kind: "posts",
+          items: posts.map((post) => ({
+            title: post.title,
+            href: post.path,
+            description: post.description,
+            date: post.published ?? post.updated,
+          })),
+        },
+      ],
+    },
+  ],
+};
+
 export const agentPages: AgentPage[] = [
   about,
   contactPage,
   privacy,
+  writingIndex,
   tenancyPost,
   approvalPost,
   toolsPost,

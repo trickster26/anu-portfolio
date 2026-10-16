@@ -2,10 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { MARKDOWN_PATHS } from "../../functions/_middleware";
-import { agentArtifacts, robotsTxt, routesJson, sitemapXml } from "./build";
+import { agentArtifacts, robotsTxt, routesJson, rssXml, sitemapXml } from "./build";
 import { homeFallbackHtml, renderNotFoundHtml, renderPageHtml } from "./html";
 import { homeMarkdown, llmsFullTxt, llmsTxt, notFoundMarkdown, pageMarkdown } from "./markdown";
-import { about, agentPages, contactPage, privacy, tenancyPost } from "./pages";
+import { about, agentPages, contactPage, posts, privacy, tenancyPost, writingIndex } from "./pages";
 import { agentReady } from "./plugin";
 
 const ASSETS = { css: ["/assets/index-abc123.css"] };
@@ -229,6 +229,7 @@ describe("sitemap.xml", () => {
       "https://anukumar.site/about",
       "https://anukumar.site/contact",
       "https://anukumar.site/privacy",
+      "https://anukumar.site/writing",
       "https://anukumar.site/writing/multi-tenant-architecture",
       "https://anukumar.site/writing/human-in-the-loop-ai-agents",
       "https://anukumar.site/writing/agentic-ai-tool-design",
@@ -338,5 +339,18 @@ describe("writing posts", () => {
     expect(html).toContain('og:image" content="https://anukumar.site/writing/multi-tenant-architecture.png"');
     expect(html).toContain('<img class="w-full');
     expect(pageMarkdown(tenancyPost)).toContain("```\nALTER TABLE invoices");
+  });
+});
+
+describe("writing index and RSS", () => {
+  it("lists every post on /writing and in the feed", () => {
+    const html = renderPageHtml(writingIndex, ASSETS);
+    const rss = rssXml();
+    for (const post of posts) {
+      expect(html).toContain(`href="${post.path}"`);
+      expect(rss).toContain(`<link>https://anukumar.site${post.path}</link>`);
+    }
+    expect(html).toContain('"@type": "CollectionPage"');
+    expect(rss).toContain('<rss version="2.0"');
   });
 });
