@@ -152,6 +152,12 @@ export const tenancy = {
   headline: "Shared schema or a database per tenant?",
   body: "Every SaaS product decides where one customer's data stops and the next one's starts. The three common answers look alike on a good day and differ on a bad one. I wrote up how each one fails and how to choose.",
   link: { label: "Read the post", href: "/writing/multi-tenant-architecture" },
+  more: [
+    {
+      label: "Human-in-the-loop AI agents: where approval gates belong",
+      href: "/writing/human-in-the-loop-ai-agents",
+    },
+  ],
   steps: [
     {
       title: "Shared schema",

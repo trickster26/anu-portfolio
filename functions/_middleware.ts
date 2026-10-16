@@ -24,6 +24,7 @@ export const MARKDOWN_PATHS = [
   "/contact.md",
   "/privacy.md",
   "/writing/multi-tenant-architecture.md",
+  "/writing/human-in-the-loop-ai-agents.md",
   "/404.md",
 ] as const;
 

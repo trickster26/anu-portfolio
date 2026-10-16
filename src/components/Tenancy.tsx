@@ -36,6 +36,18 @@ export function Tenancy() {
               className="text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
             />
           </a>
+          <p className="mt-6 text-[14px] text-muted">
+            Also:{" "}
+            {tenancy.more.map((post) => (
+              <a
+                key={post.href}
+                href={post.href}
+                className="text-accent underline decoration-accent-dim underline-offset-4 transition-colors hover:text-text"
+              >
+                {post.label}
+              </a>
+            ))}
+          </p>
         </Reveal>
 
         <div className="mt-20 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">

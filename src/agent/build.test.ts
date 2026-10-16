@@ -230,6 +230,7 @@ describe("sitemap.xml", () => {
       "https://anukumar.site/contact",
       "https://anukumar.site/privacy",
       "https://anukumar.site/writing/multi-tenant-architecture",
+      "https://anukumar.site/writing/human-in-the-loop-ai-agents",
     ]);
   });
 
