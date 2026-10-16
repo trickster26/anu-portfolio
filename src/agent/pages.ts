@@ -15,7 +15,8 @@ import { education, experience, person, projects, stack } from "../content";
 export type Block =
   | { kind: "p"; text: string }
   | { kind: "list"; items: string[] }
-  | { kind: "definitions"; items: { term: string; description: string }[] };
+  | { kind: "definitions"; items: { term: string; description: string }[] }
+  | { kind: "code"; text: string };
 
 export type Section = { heading: string; blocks: Block[] };
 
@@ -32,6 +33,8 @@ export type AgentPage = {
   sections: Section[];
   /** ISO date of the last substantive edit, used for sitemap lastmod. */
   updated: string;
+  /** Set on posts under /writing: renders as a BlogPosting authored by #person. */
+  published?: string;
 };
 
 const UPDATED = "2026-10-16";
@@ -235,4 +238,137 @@ export const privacy: AgentPage = {
   ],
 };
 
-export const agentPages: AgentPage[] = [about, contactPage, privacy];
+/**
+ * Writing. General engineering study material only: no in-house product names,
+ * no description of any specific production system.
+ */
+export const tenancyPost: AgentPage = {
+  path: "/writing/multi-tenant-architecture",
+  markdownPath: "/writing/multi-tenant-architecture.md",
+  title: "Multi-tenant architecture: shared schema vs database per tenant",
+  heading: "Multi-tenant architecture: shared schema vs database per tenant",
+  description:
+    "The three ways to separate SaaS customers' data, how each one fails, what database per tenant really costs, and how to choose.",
+  lede: "Every SaaS product has to decide where one customer's data stops and the next one's starts. There are three common answers. On a good day they look much the same. They differ in what happens on a bad one.",
+  updated: "2026-10-16",
+  published: "2026-10-16",
+  sections: [
+    {
+      heading: "The three models",
+      blocks: [
+        {
+          kind: "definitions",
+          items: [
+            {
+              term: "Shared schema",
+              description: "One database, one set of tables, and a tenant_id column on every row. Cheapest to run and simplest to migrate. Isolation depends on every query filtering by tenant_id.",
+            },
+            {
+              term: "Schema per tenant",
+              description: "One database server with a separate schema for each tenant. Tables are separate, connections are usually shared, and every migration runs once per schema.",
+            },
+            {
+              term: "Database per tenant",
+              description: "A separate database for each tenant, sometimes with a separate application process as well. The strongest isolation, and the most to operate.",
+            },
+          ],
+        },
+        {
+          kind: "p",
+          text: "Most teams start with a shared schema, and most should. The question is when it stops being enough.",
+        },
+      ],
+    },
+    {
+      heading: "Where a shared schema breaks",
+      blocks: [
+        {
+          kind: "p",
+          text: "The classic leak isn't in the main screens. Those get tested. It's in the CSV export someone added on a Friday, the background job that loops over invoices, or the admin report that joins three tables and filters only one of them. One missing tenant_id filter and a customer sees someone else's data.",
+        },
+        {
+          kind: "p",
+          text: "Postgres can enforce the filter for you with row-level security, so a forgotten WHERE clause returns nothing instead of everything:",
+        },
+        {
+          kind: "code",
+          text: "ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;\nALTER TABLE invoices FORCE ROW LEVEL SECURITY;\n\nCREATE POLICY tenant_isolation ON invoices\n  USING (tenant_id = current_setting('app.tenant_id')::uuid);\n\n-- per request, inside the transaction:\nSET LOCAL app.tenant_id = '6f1c...';",
+        },
+        {
+          kind: "p",
+          text: "Two details catch people out. Without FORCE, the table's owner skips the policy, and apps often connect as the owner. Superusers skip it regardless. And SET LOCAL only lasts for the transaction, which is what you want with a connection pool: a plain SET would leak one request's tenant into the next request that borrows the connection.",
+        },
+        {
+          kind: "p",
+          text: "The other shared-schema problem is the noisy neighbour. One tenant's slow report or bulk import competes with everyone else for the same tables, indexes and connections.",
+        },
+      ],
+    },
+    {
+      heading: "What database per tenant buys you",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Isolation by connection. A pool opened against one database can't read another, so cross-tenant access stops being something you can write by accident.",
+            "Clean exits. Deleting a customer is DROP DATABASE, not a delete script across forty tables. That matters when a customer, or a data protection law, asks for erasure.",
+            "Per-tenant backup and restore. You can roll one customer back to yesterday without touching anyone else.",
+            "Bounded noisy neighbours. Give each tenant a small pool and a heavy tenant mostly slows itself down.",
+            "Room for different schemas, if different kinds of customer genuinely need different tables. Use this sparingly, because every variation is a code path to test.",
+          ],
+        },
+        {
+          kind: "p",
+          text: "There are two ways to run it. One application can keep a pool per tenant and pick the right one per request:",
+        },
+        {
+          kind: "code",
+          text: "const pools = new Map();\n\nfunction poolFor(tenant) {\n  if (!pools.has(tenant.id)) {\n    pools.set(tenant.id, mysql.createPool({\n      database: tenant.dbName,\n      connectionLimit: 5,\n    }));\n  }\n  return pools.get(tenant.id);\n}",
+        },
+        {
+          kind: "p",
+          text: "Or each tenant gets its own process, started with its database name and holding exactly one pool. A process per tenant also isolates memory leaks and crashes, at the price of idle memory for every customer who isn't using the product right now.",
+        },
+      ],
+    },
+    {
+      heading: "What it costs",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Migrations run N times. Skip one tenant and its schema drifts. Drift fails quietly: the one feature that needs the missing column returns a 500, and nobody connects the error to a migration that never ran.",
+            "Connections multiply. Fifty tenants with a pool of ten is five hundred possible connections. MySQL and MariaDB default max_connections to 151.",
+            "Cross-tenant questions get hard. \"How many invoices did all customers send last month\" becomes one query per database, or a separate analytics store fed from all of them.",
+            "Login needs a directory. With no global users table, something has to map an email address or a subdomain to the right tenant before authentication can even start.",
+            "Provisioning has many steps and has to survive failing halfway. Record each step as it completes, and save the database name the moment it exists, so a retry resumes instead of leaving an orphaned database behind.",
+          ],
+        },
+        {
+          kind: "p",
+          text: "Drift is the one to plan for on day one. Keep a migrations table in every tenant database, compare each tenant against the repository before a deploy, and refuse to deploy code that needs a column some tenants don't have yet. Reads that tolerate a missing optional column turn a broken module into a missing feature.",
+        },
+      ],
+    },
+    {
+      heading: "How to choose",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "How many tenants? Tens or hundreds of business customers can each have a database. Tens of thousands of free accounts can't, at least not cheaply.",
+            "What does one leaked row cost? For health, legal or financial records, the answer may be the company.",
+            "Do customers ask for their own backups, their own region, or proof of deletion? Those are much easier with a database each.",
+            "Do tenants really need different schemas, or just different settings?",
+          ],
+        },
+        {
+          kind: "p",
+          text: "My default is a shared schema with row-level security, plus a test that runs every query path as two tenants and fails if either sees the other. Move to a database per tenant when the answers above point there, not before. Schema per tenant sits in between, and it inherits the migration cost of the strict option without all of its isolation, so I rarely pick it.",
+        },
+      ],
+    },
+  ],
+};
+
+export const agentPages: AgentPage[] = [about, contactPage, privacy, tenancyPost];

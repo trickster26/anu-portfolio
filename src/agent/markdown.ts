@@ -34,6 +34,8 @@ function renderBlock(block: Block): string {
       return block.items.map((item) => `- ${item}`).join("\n");
     case "definitions":
       return block.items.map((item) => `- **${item.term}:** ${item.description}`).join("\n");
+    case "code":
+      return "```\n" + block.text + "\n```";
   }
 }
 
@@ -213,7 +215,7 @@ export function notFoundMarkdown(): string {
   return [
     "# 404 — Page not found",
     "",
-    `No page exists at that path on ${SITE_ORIGIN}. The site is up; this URL is simply not one of its four pages.`,
+    `No page exists at that path on ${SITE_ORIGIN}. The site is up; this URL is simply not one of its pages.`,
     "",
     "## Where to look next",
     "",

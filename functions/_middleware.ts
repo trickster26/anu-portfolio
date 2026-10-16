@@ -23,6 +23,7 @@ export const MARKDOWN_PATHS = [
   "/about.md",
   "/contact.md",
   "/privacy.md",
+  "/writing/multi-tenant-architecture.md",
   "/404.md",
 ] as const;
 

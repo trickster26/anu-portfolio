@@ -5,7 +5,7 @@ import { MARKDOWN_PATHS } from "../../functions/_middleware";
 import { agentArtifacts, robotsTxt, routesJson, sitemapXml } from "./build";
 import { homeFallbackHtml, renderNotFoundHtml, renderPageHtml } from "./html";
 import { homeMarkdown, llmsFullTxt, llmsTxt, notFoundMarkdown, pageMarkdown } from "./markdown";
-import { about, agentPages, contactPage, privacy } from "./pages";
+import { about, agentPages, contactPage, privacy, tenancyPost } from "./pages";
 import { agentReady } from "./plugin";
 
 const ASSETS = { css: ["/assets/index-abc123.css"] };
@@ -222,13 +222,14 @@ describe("homeMarkdown", () => {
 describe("sitemap.xml", () => {
   const xml = sitemapXml();
 
-  it("lists the homepage and every trust-anchor page, and nothing else", () => {
+  it("lists the homepage and every generated page, and nothing else", () => {
     const locations = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
     expect(locations).toEqual([
       "https://anukumar.site/",
       "https://anukumar.site/about",
       "https://anukumar.site/contact",
       "https://anukumar.site/privacy",
+      "https://anukumar.site/writing/multi-tenant-architecture",
     ]);
   });
 
@@ -313,5 +314,22 @@ describe("agentArtifacts", () => {
     const headers = artifacts.find((artifact) => artifact.fileName === "_headers")!.source;
     expect(headers).toContain("Content-Type: text/markdown; charset=utf-8");
     expect(headers).toContain("Vary: Accept");
+  });
+});
+
+describe("writing posts", () => {
+  const html = renderPageHtml(tenancyPost, ASSETS);
+
+  it("marks the post up as a BlogPosting authored by the site's Person", () => {
+    expect(html).toContain('"@type": "BlogPosting"');
+    expect(html).toContain('"datePublished": "2026-10-16"');
+    expect(html).toContain('"@id": "https://anukumar.site/#person"');
+  });
+
+  it("renders code blocks escaped and shows a dated byline", () => {
+    expect(html).toContain("<pre");
+    expect(html).toContain("current_setting('app.tenant_id')");
+    expect(html).toContain('<time datetime="2026-10-16">');
+    expect(pageMarkdown(tenancyPost)).toContain("```\nALTER TABLE invoices");
   });
 });

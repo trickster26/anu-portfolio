@@ -161,10 +161,32 @@ function renderBlockHtml(block: Block): string {
             `<div class="border-t border-line py-4"><dt class="font-mono text-[12px] uppercase tracking-[0.14em] text-dim">${escapeHtml(item.term)}</dt><dd class="mt-2 text-[15px] leading-relaxed text-muted">${linkify(item.description)}</dd></div>`,
         )
         .join("")}</dl>`;
+    case "code":
+      // Wraps rather than scrolls: a native scrollbar on a dark page is the loudest thing on it.
+      return `<div class="mt-6 max-w-[68ch]"><pre class="whitespace-pre-wrap break-words rounded-[12px] border border-line bg-surface p-4 font-mono text-[13px] leading-relaxed text-text"><code>${escapeHtml(block.text)}</code></pre></div>`;
   }
 }
 
 function pageStructuredData(page: AgentPage): unknown[] {
+  if (page.published) {
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "@id": url(page.path),
+        url: url(page.path),
+        headline: page.title,
+        description: page.description,
+        inLanguage: "en",
+        datePublished: page.published,
+        dateModified: page.updated,
+        author: { "@type": "Person", "@id": `${SITE_ORIGIN}/#person`, name: person.name, url: SITE_ORIGIN },
+        isPartOf: { "@type": "WebSite", "@id": `${SITE_ORIGIN}/#website` },
+        image: `${SITE_ORIGIN}/og.jpg`,
+      },
+    ];
+  }
+
   const type =
     page.path === "/about" ? "AboutPage" : page.path === "/contact" ? "ContactPage" : "WebPage";
 
@@ -199,7 +221,11 @@ ${section.blocks.map((block) => `          ${renderBlockHtml(block)}`).join("\n"
 
   const body = pageChrome(`      <main class="mx-auto max-w-[1400px] px-5 py-20 sm:px-8 sm:py-28">
         <div class="max-w-[72ch]">
-          <h1 class="font-display text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1.04] tracking-[-0.03em] text-text">${escapeHtml(page.heading)}</h1>
+          <h1 class="font-display text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1.04] tracking-[-0.03em] text-text">${escapeHtml(page.heading)}</h1>${
+            page.published
+              ? `\n          <p class="mt-5 text-[14px] text-dim"><a class="text-text hover:text-accent" href="/">${escapeHtml(person.name)}</a>, <time datetime="${escapeHtml(page.published)}">${escapeHtml(page.published)}</time></p>`
+              : ""
+          }
           <p class="mt-8 text-[17px] leading-relaxed text-text/90 sm:text-lg">${linkify(page.lede)}</p>
 
 ${sections}
@@ -243,7 +269,7 @@ export function renderNotFoundHtml(assets: Assets): string {
           <p class="font-mono text-[12px] uppercase tracking-[0.18em] text-accent">404</p>
           <h1 class="mt-4 font-display text-[clamp(2.2rem,5vw,3.6rem)] font-semibold leading-[1.04] tracking-[-0.03em] text-text">Page not found</h1>
           <p class="mt-8 text-[17px] leading-relaxed text-muted sm:text-lg">
-            No page exists at that path. The site is up; this URL is simply not one of its four pages.
+            No page exists at that path. The site is up; this URL is simply not one of its pages.
             There are no dynamic routes here, so a path not listed below has never existed.
           </p>
 
