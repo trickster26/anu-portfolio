@@ -25,6 +25,10 @@ export const MARKDOWN_PATHS = [
   "/privacy.md",
   "/writing/multi-tenant-architecture.md",
   "/writing/human-in-the-loop-ai-agents.md",
+  "/writing/agentic-ai-tool-design.md",
+  "/writing/rag-retrieval-hybrid-search.md",
+  "/writing/multi-agent-systems.md",
+  "/writing/llm-evaluation-llm-as-a-judge.md",
   "/404.md",
 ] as const;
 

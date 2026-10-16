@@ -480,4 +480,369 @@ export const approvalPost: AgentPage = {
   ],
 };
 
-export const agentPages: AgentPage[] = [about, contactPage, privacy, tenancyPost, approvalPost];
+export const toolsPost: AgentPage = {
+  path: "/writing/agentic-ai-tool-design",
+  markdownPath: "/writing/agentic-ai-tool-design.md",
+  title: "Agentic AI in practice: tool design matters more than the prompt",
+  heading: "Agentic AI in practice: tool design matters more than the prompt",
+  description:
+    "Why most agent failures come from the tools, not the system prompt: naming, granularity, what tools return, error messages that teach, safe retries and hard limits.",
+  lede: "When an agent misbehaves, the usual reaction is to rewrite the system prompt. Most of the time the problem is the tools: what they're called, what they accept, and what they say back when something goes wrong.",
+  updated: "2026-10-16",
+  published: "2026-10-16",
+  sections: [
+    {
+      heading: "The model only sees names and descriptions",
+      blocks: [
+        {
+          kind: "p",
+          text: "An agent picks a tool from its name, its description and its argument schema. Nothing else. Give it search_customers and find_customer with similar descriptions and every lookup becomes a coin flip.",
+        },
+        {
+          kind: "p",
+          text: "Write descriptions the way you'd brief a new teammate: what the tool does, when to use it, when not to, and what a good argument looks like. \"Searches customers\" is a label. \"Find customers by name, email or phone. Use this before any action that needs a customer_id. Partial names work.\" is an instruction.",
+        },
+      ],
+    },
+    {
+      heading: "Fewer, higher-level tools",
+      blocks: [
+        {
+          kind: "p",
+          text: "If answering \"what did this customer order last week\" takes list_orders, then get_order for each one, then list_order_items, the agent makes a dozen calls. Each call is a round trip, more tokens in context, and one more chance to go wrong. One get_recent_orders(customer_id, days) tool does the same job in one step.",
+        },
+        {
+          kind: "p",
+          text: "Don't take this too far. A tool that both looks things up and changes them is hard to describe and hard to approve. Group by task, keep reads and writes apart.",
+        },
+      ],
+    },
+    {
+      heading: "Return what the model needs, not the raw API",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Drop fields the agent will never use. A forty-field JSON record costs tokens on every call and buries the three fields that matter.",
+            "Prefer names over opaque IDs where you can, and include the ID too when a later tool needs it.",
+            "Cap list sizes and say so: \"Showing 20 of 312. Narrow the search or call again with page=2.\"",
+          ],
+        },
+      ],
+    },
+    {
+      heading: "Errors are instructions",
+      blocks: [
+        {
+          kind: "p",
+          text: "An agent reads a tool's error and decides what to do next. A bare error gives it nothing to work with, so it retries the same call or invents an answer. A good error says what went wrong and what to try instead.",
+        },
+        {
+          kind: "code",
+          text: "# unhelpful\n{\"error\": \"not found\"}\n\n# helpful\n{\"error\": \"No customer with email ravi@exmple.com. The domain may be misspelled. Try search_customers with the name or phone number.\"}",
+        },
+      ],
+    },
+    {
+      heading: "Make writes safe to retry",
+      blocks: [
+        {
+          kind: "p",
+          text: "Agents retry. Networks time out after a request has already landed. Any tool that writes should take an idempotency key, so the same call twice does the work once. Validate arguments inside the tool instead of trusting the model to send sensible values, and for risky actions offer a dry_run flag that shows what would change without changing it.",
+        },
+      ],
+    },
+    {
+      heading: "Put the limits outside the model",
+      blocks: [
+        {
+          kind: "p",
+          text: "A model asked to stop after ten steps will sometimes take thirty. Enforce a maximum number of steps, a timeout per tool and a token or cost budget in the code that runs the loop. When a limit is hit, stop and return what was done so far with a plain explanation. A partial answer with a reason beats an agent that loops until something else kills it.",
+        },
+        {
+          kind: "p",
+          text: "Before you touch the prompt again, read a few transcripts of the agent failing. Usually you'll see it misread a tool, drown in a tool's output, or retry an error it couldn't understand. Those are tool fixes.",
+        },
+      ],
+    },
+  ],
+};
+
+export const ragPost: AgentPage = {
+  path: "/writing/rag-retrieval-hybrid-search",
+  markdownPath: "/writing/rag-retrieval-hybrid-search.md",
+  title: "RAG retrieval: hybrid search, reranking and measuring recall",
+  heading: "RAG retrieval: hybrid search, reranking and measuring recall",
+  description:
+    "Most wrong RAG answers are retrieval failures. How to measure retrieval on its own, chunk by structure, combine keyword and vector search, rerank, and filter safely.",
+  lede: "When a RAG system gives a wrong answer, the model usually isn't the problem. It answered from the chunks it was given, and the right chunk wasn't among them. Fix retrieval and most of the bad answers go away.",
+  updated: "2026-10-16",
+  published: "2026-10-16",
+  sections: [
+    {
+      heading: "Measure retrieval on its own",
+      blocks: [
+        {
+          kind: "p",
+          text: "Before changing prompts or models, write down 50 to 100 real questions and, for each one, the chunk or chunks that actually answer it. Then measure retrieval without the model in the way.",
+        },
+        {
+          kind: "definitions",
+          items: [
+            { term: "recall@k", description: "The share of questions where at least one correct chunk appears in the top k results. If recall@5 is 60%, the model is missing the answer on four questions out of ten before it writes a word." },
+            { term: "MRR", description: "Mean reciprocal rank: 1 divided by the position of the first correct chunk, averaged over questions. It tells you whether the right chunk is near the top or scraping in at rank 9." },
+          ],
+        },
+        {
+          kind: "p",
+          text: "Every change below should move one of these numbers. If it doesn't, it isn't helping.",
+        },
+      ],
+    },
+    {
+      heading: "Chunk by structure, not by character count",
+      blocks: [
+        {
+          kind: "p",
+          text: "Fixed 500-character splits cut tables in half and separate step 4 from steps 1 to 3. Split on the document's own structure instead: headings, paragraphs, list items, table rows kept together. Prefix each chunk with its heading path, like \"Billing > Refunds > Partial refunds\", so a chunk that says \"this takes 5 days\" still knows what \"this\" is.",
+        },
+        {
+          kind: "p",
+          text: "Size is a trade-off. Tiny chunks lose context. Huge chunks blur several topics into one embedding, and the one sentence that matters gets diluted.",
+        },
+      ],
+    },
+    {
+      heading: "Hybrid search: keywords and vectors together",
+      blocks: [
+        {
+          kind: "p",
+          text: "Embeddings are good at meaning and bad at exact strings. Ask about error E1042, SKU 88-210 or a person's surname and vector search often returns things that are about the same topic but not that exact thing. Keyword search such as BM25 handles exactly those cases.",
+        },
+        {
+          kind: "p",
+          text: "Run both and merge the result lists. Reciprocal rank fusion is the simple, robust way to do it, because it uses only the rank in each list, not the scores, which aren't comparable between the two systems:",
+        },
+        {
+          kind: "code",
+          text: "def rrf(result_lists, k=60):\n    scores = {}\n    for results in result_lists:\n        for rank, doc_id in enumerate(results, start=1):\n            scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank)\n    return sorted(scores, key=scores.get, reverse=True)",
+        },
+        {
+          kind: "p",
+          text: "k=60 is the value from the original RRF paper and a reasonable default.",
+        },
+      ],
+    },
+    {
+      heading: "Rerank the candidates",
+      blocks: [
+        {
+          kind: "p",
+          text: "Embedding search compares a query vector with chunk vectors that were computed separately. A cross-encoder reranker reads the query and each chunk together, so it judges relevance much better, but it's too slow to run over the whole corpus. Retrieve 50 candidates cheaply, rerank them, keep the top 5.",
+        },
+      ],
+    },
+    {
+      heading: "Filter before you rank",
+      blocks: [
+        {
+          kind: "p",
+          text: "If the question is about one product, one year or one customer's documents, apply that as a metadata filter, not as something you hope similarity will sort out. Permissions especially: filter out documents the user isn't allowed to see before retrieval. A prompt that says \"don't mention confidential documents\" is not access control.",
+        },
+      ],
+    },
+    {
+      heading: "Plan for finding nothing",
+      blocks: [
+        {
+          kind: "p",
+          text: "Some questions have no answer in your data. If the best reranked score is below a threshold you've checked against your test set, tell the model nothing relevant was found and let it say so. \"I couldn't find this in the documentation\" is a good answer. A confident answer stitched together from loosely related chunks is the worst one.",
+        },
+      ],
+    },
+  ],
+};
+
+export const multiAgentPost: AgentPage = {
+  path: "/writing/multi-agent-systems",
+  markdownPath: "/writing/multi-agent-systems.md",
+  title: "Multi-agent systems: when splitting an agent helps and when it just costs more",
+  heading: "Multi-agent systems: when splitting an agent helps and when it just costs more",
+  description:
+    "What multiple agents actually buy you, what they cost in tokens and reliability, the patterns that work, how to write handoffs, and why to start with one agent.",
+  lede: "Splitting one agent into several is one of the most popular moves in agent design, and often the most expensive one. It helps in a specific situation. Outside it, you pay more for a system that's harder to debug.",
+  updated: "2026-10-16",
+  published: "2026-10-16",
+  sections: [
+    {
+      heading: "What multiple agents actually buy",
+      blocks: [
+        {
+          kind: "p",
+          text: "The real benefit is separate context windows. A subagent researching one question works in a clean context that holds only that question, its tools and its findings. It hands back a short summary, and the lead agent never sees the hundred search results behind it. For broad tasks that would otherwise overflow one context, that's a genuine gain.",
+        },
+        {
+          kind: "p",
+          text: "The second benefit is parallelism. If a task breaks into independent pieces, like checking five sources or reviewing five files, subagents can run at the same time.",
+        },
+      ],
+    },
+    {
+      heading: "What it costs",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Tokens. Every agent reads its own instructions, tools and context. Anthropic reported that its multi-agent research system used roughly 15 times the tokens of a plain chat interaction. That can be worth it for high-value work. It isn't for routine tasks.",
+            "Compounding errors. If each handoff is right 95% of the time, a chain of five is right about 77% of the time (0.95 to the power of 5).",
+            "Lost context. The lead agent knows why a task matters. A subagent knows only what the handoff told it.",
+            "Debugging. A wrong answer now has several transcripts behind it, and the mistake might be in any of them or in a handoff between them.",
+          ],
+        },
+      ],
+    },
+    {
+      heading: "Patterns that hold up",
+      blocks: [
+        {
+          kind: "definitions",
+          items: [
+            { term: "Orchestrator and workers", description: "A lead agent plans, sends independent subtasks to workers that run in parallel, then combines their results. Good for research and wide searches." },
+            { term: "Pipeline", description: "Fixed stages in a fixed order, like extract, then check, then write. Often this doesn't need agents at all, just a sequence of model calls." },
+            { term: "Router", description: "One step decides which specialist handles a request, then gets out of the way. Good when requests fall into clearly different types." },
+          ],
+        },
+        {
+          kind: "p",
+          text: "The pattern to avoid is several agents talking freely to each other until they agree. It's hard to predict, hard to bound and hard to test.",
+        },
+      ],
+    },
+    {
+      heading: "Write handoffs like task specs",
+      blocks: [
+        {
+          kind: "p",
+          text: "\"Research competitor pricing\" sent to three workers produces three overlapping reports. A handoff needs the objective, the boundaries, the expected output and when to stop:",
+        },
+        {
+          kind: "code",
+          text: "{\n  \"objective\": \"Find current list prices for the 3 cheapest plans of vendor X\",\n  \"scope\": \"Vendor's own pricing page and docs only. Not reviews or forums.\",\n  \"output\": \"JSON: [{plan, monthly_price, currency, source_url}]\",\n  \"stop_when\": \"All 3 plans found, or 5 tool calls used\"\n}",
+        },
+      ],
+    },
+    {
+      heading: "Start with one agent",
+      blocks: [
+        {
+          kind: "p",
+          text: "Build one agent with good tools first and measure it. Split it only when you can point to the problem splitting solves: the context keeps overflowing, or the work has clearly independent parts that would finish faster in parallel. Then run the same evals on both versions. If the multi-agent version isn't measurably better, keep the simpler one.",
+        },
+      ],
+    },
+  ],
+};
+
+export const evalsPost: AgentPage = {
+  path: "/writing/llm-evaluation-llm-as-a-judge",
+  markdownPath: "/writing/llm-evaluation-llm-as-a-judge.md",
+  title: "LLM evaluation: evals that catch regressions, and when to trust LLM-as-a-judge",
+  heading: "LLM evaluation: evals that catch regressions, and when to trust LLM-as-a-judge",
+  description:
+    "How to build an eval set from real failures, what to check with code first, the known biases of LLM-as-a-judge and how to calibrate it, evaluating agent trajectories, and running evals like tests.",
+  lede: "Without evals, every prompt change is a guess. You fix the example in front of you and quietly break three you aren't looking at. An eval set turns that guess into a number you can watch.",
+  updated: "2026-10-16",
+  published: "2026-10-16",
+  sections: [
+    {
+      heading: "Start from real failures",
+      blocks: [
+        {
+          kind: "p",
+          text: "The best eval cases come from real inputs, especially the ones that went wrong. Collect 50 to 200 of them, write down what a correct outcome looks like for each, and tag them by type: language, task, customer segment, whatever splits your traffic. An average score hides a feature that's broken for one slice.",
+        },
+        {
+          kind: "p",
+          text: "Synthetic cases are useful for coverage, but they tend to be cleaner than real users. Keep real ones as the core.",
+        },
+      ],
+    },
+    {
+      heading: "Check with code first",
+      blocks: [
+        {
+          kind: "p",
+          text: "A lot of quality is checkable without another model. Is the output valid JSON with the required fields? Did the agent call the right tool with the right arguments? Does every citation point to a document that was actually retrieved? Is the answer under the length limit? These checks are fast, free and give the same result every run. Write them before reaching for a judge.",
+        },
+      ],
+    },
+    {
+      heading: "LLM-as-a-judge, carefully",
+      blocks: [
+        {
+          kind: "p",
+          text: "For open-ended qualities like helpfulness or tone, a model grading another model's output is often the only practical option. It has known biases, documented in the MT-Bench paper by Zheng et al. (2023):",
+        },
+        {
+          kind: "list",
+          items: [
+            "Position bias: when comparing two answers, judges tend to favour one position regardless of content.",
+            "Verbosity bias: longer answers look better to judges even when they aren't.",
+            "Self-enhancement bias: a judge can favour answers written by its own model.",
+          ],
+        },
+        {
+          kind: "p",
+          text: "What helps: a rubric with specific, checkable criteria instead of \"rate quality from 1 to 10\". Pass/fail or a three-point scale rather than fine-grained scores. Asking for the reasoning before the verdict. In pairwise comparisons, running both orders and only counting consistent wins.",
+        },
+        {
+          kind: "code",
+          text: "Grade the answer against the reference.\nCriteria, each PASS or FAIL:\n1. States the refund window that the reference states.\n2. Does not promise anything the reference does not support.\n3. Tells the user the next step to take.\nGive one line of reasoning per criterion, then the verdicts.",
+        },
+        {
+          kind: "p",
+          text: "Then calibrate. Grade 50 to 100 cases by hand, run the judge on the same cases and measure how often it agrees with you. If agreement is poor, fix the rubric before you trust a single number it produces.",
+        },
+      ],
+    },
+    {
+      heading: "For agents, grade the trajectory too",
+      blocks: [
+        {
+          kind: "p",
+          text: "An agent can reach the right answer the wrong way: ten tool calls where two would do, a write it shouldn't have made, a lucky guess after a failed lookup. Score the path as well as the result. Did it call the expected tools? How many steps did it take? Did it stop when it should? What did the run cost and how long did it take?",
+        },
+      ],
+    },
+    {
+      heading: "Run evals like tests",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Run the suite on every prompt change, model change and tool change, and compare against the last known good run.",
+            "Model output varies between runs. Run each case several times and track the pass rate, not a single pass or fail.",
+            "Watch the slices, not only the total.",
+            "Every production failure becomes a new case. The set should grow every week.",
+          ],
+        },
+        {
+          kind: "p",
+          text: "An eval set doesn't need to be big or clever on day one. Twenty real cases with honest checks will catch more regressions than a polished benchmark nobody runs.",
+        },
+      ],
+    },
+  ],
+};
+
+export const agentPages: AgentPage[] = [
+  about,
+  contactPage,
+  privacy,
+  tenancyPost,
+  approvalPost,
+  toolsPost,
+  ragPost,
+  multiAgentPost,
+  evalsPost,
+];

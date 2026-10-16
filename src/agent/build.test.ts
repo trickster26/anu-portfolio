@@ -231,6 +231,10 @@ describe("sitemap.xml", () => {
       "https://anukumar.site/privacy",
       "https://anukumar.site/writing/multi-tenant-architecture",
       "https://anukumar.site/writing/human-in-the-loop-ai-agents",
+      "https://anukumar.site/writing/agentic-ai-tool-design",
+      "https://anukumar.site/writing/rag-retrieval-hybrid-search",
+      "https://anukumar.site/writing/multi-agent-systems",
+      "https://anukumar.site/writing/llm-evaluation-llm-as-a-judge",
     ]);
   });
 

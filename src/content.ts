@@ -153,10 +153,11 @@ export const tenancy = {
   body: "Every SaaS product decides where one customer's data stops and the next one's starts. The three common answers look alike on a good day and differ on a bad one. I wrote up how each one fails and how to choose.",
   link: { label: "Read the post", href: "/writing/multi-tenant-architecture" },
   more: [
-    {
-      label: "Human-in-the-loop AI agents: where approval gates belong",
-      href: "/writing/human-in-the-loop-ai-agents",
-    },
+    { label: "Agentic AI: tool design matters more than the prompt", href: "/writing/agentic-ai-tool-design" },
+    { label: "RAG retrieval: hybrid search, reranking and recall", href: "/writing/rag-retrieval-hybrid-search" },
+    { label: "Multi-agent systems: when splitting an agent helps", href: "/writing/multi-agent-systems" },
+    { label: "LLM evaluation and LLM-as-a-judge", href: "/writing/llm-evaluation-llm-as-a-judge" },
+    { label: "Human-in-the-loop AI agents: where approval gates belong", href: "/writing/human-in-the-loop-ai-agents" },
   ],
   steps: [
     {
