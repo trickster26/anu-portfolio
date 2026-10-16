@@ -20,7 +20,7 @@ import { renderNotFoundHtml, renderPageHtml, type Assets } from "./html";
 export type Artifact = { fileName: string; source: string };
 
 /** Date the homepage content last changed, for sitemap lastmod. */
-const HOME_UPDATED = "2026-08-23";
+const HOME_UPDATED = "2026-10-16";
 
 export function sitemapXml(): string {
   const entries = [

@@ -213,7 +213,7 @@ ${sections}
       </main>`);
 
   return shell({
-    title: `${page.title} — ${person.name}`,
+    title: page.title.includes(person.name) ? page.title : `${page.title} — ${person.name}`,
     description: page.description,
     canonical: url(page.path),
     markdownHref: url(page.markdownPath),

@@ -34,12 +34,12 @@ export type AgentPage = {
   updated: string;
 };
 
-const UPDATED = "2026-08-23";
+const UPDATED = "2026-10-16";
 
 export const about: AgentPage = {
   path: "/about",
   markdownPath: "/about.md",
-  title: `About ${person.name}`,
+  title: `About ${person.name}, Senior AI Engineer in Mohali`,
   heading: `About ${person.name}`,
   description:
     "Who Anu Kumar is, what he works on, and the kind of engineering problem he is the right person to call about.",
