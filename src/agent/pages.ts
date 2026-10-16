@@ -71,7 +71,7 @@ export const about: AgentPage = {
         },
         {
           kind: "p",
-          text: "Alongside the employed work there is a shipped-product record that is unusual for an AI engineer: a multi-tenant SaaS CRM where every customer gets a physically separate database and its own running process, an SEO command centre driven by a set of specialised agents rather than one prompt, and a convolutional model trained end to end for chest X-ray classification. These are built systems with real users, not weekend prototypes.",
+          text: "Alongside the employed work there is a shipped-product record that is unusual for an AI engineer: a CRM product used by businesses across several industries, an AI-assisted SEO tool, and a convolutional model trained end to end for chest X-ray classification. These are built systems with real users, not weekend prototypes.",
         },
         {
           kind: "list",

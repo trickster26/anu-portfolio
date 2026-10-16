@@ -97,14 +97,13 @@ export const projects: Project[] = [
     id: "napcrm",
     name: "NapCRM",
     year: "2025",
-    summary:
-      "Multi-tenant SaaS CRM where every customer gets an isolated database and its own process.",
+    summary: "A CRM product for small and mid-size businesses across several industries.",
     detail:
-      "Provisioning creates the tenant database, runs industry-specific migrations, starts a dedicated backend process, and writes the DNS record. Feature access is gated per industry and plan, so one codebase serves verticals that do not resemble each other.",
-    stack: ["Node.js", "Express", "MariaDB", "React", "PM2", "Cloudflare"],
+      "Built and shipped end to end: the backend, the admin panel, and the customer-facing storefronts the businesses run on.",
+    stack: ["Node.js", "React"],
     image: "/work/napcrm.jpg",
-    imageAlt: "Storefront of Verma Industries, a live NapCRM tenant",
-    imageCaption: "A live tenant: verma-industries.in",
+    imageAlt: "Storefront of Verma Industries, built on NapCRM",
+    imageCaption: "A storefront built on it: verma-industries.in",
   },
   {
     id: "adnosaur",
@@ -126,11 +125,9 @@ export const projects: Project[] = [
     id: "napseo",
     name: "NapSEO",
     year: "2025",
-    summary:
-      "An SEO command centre run by a set of specialised agents rather than one prompt.",
-    detail:
-      "Separate agents handle audit, keyword research, content briefs, and internal linking, each with its own tools and output contract. Multi-project, so one workspace can hold unrelated sites without the agents bleeding context across them.",
-    stack: ["Node.js", "React", "LLM agents", "PostgreSQL"],
+    summary: "An SEO tool that uses LLM agents for audits, keyword research and content planning.",
+    detail: "One workspace handles several unrelated sites.",
+    stack: ["Node.js", "React", "LLM agents"],
     // Runs locally only and needs a database that is not on this machine.
     // Restore once npm run capture napseo has been run:
     // image: "/work/napseo.jpg",
@@ -147,26 +144,26 @@ export const projects: Project[] = [
   },
 ];
 
-/** The multi-tenant provisioning sequence, used as the immersive section's spine. */
+/**
+ * Teaser for the multi-tenant architecture post. General study material only:
+ * it describes the patterns, never how any in-house product implements them.
+ */
 export const tenancy = {
-  headline: "One codebase. Isolated tenants. No shared query path.",
-  body: "Multi-tenancy usually means a tenant_id column and a lot of discipline. NapCRM does not work that way. Each customer gets a physically separate database and its own running process, which makes a cross-tenant leak something you cannot write by accident.",
+  headline: "Shared schema or a database per tenant?",
+  body: "Every SaaS product decides where one customer's data stops and the next one's starts. The three common answers look alike on a good day and differ on a bad one. I wrote up how each one fails and how to choose.",
+  link: { label: "Read the post", href: "/writing/multi-tenant-architecture" },
   steps: [
     {
-      title: "Provision",
-      body: "A dedicated database is created and migrated with the schema for that customer's industry.",
+      title: "Shared schema",
+      body: "One set of tables and a tenant_id on every row. Cheapest to run. Isolation depends on every query remembering the filter.",
     },
     {
-      title: "Isolate",
-      body: "The backend boots bound to one database pool. No code path reaches another tenant's data.",
+      title: "Schema per tenant",
+      body: "Separate tables on a shared server. Every migration runs once per schema.",
     },
     {
-      title: "Route",
-      body: "A process starts under its own supervisor entry, and a DNS record points the customer's subdomain at it.",
-    },
-    {
-      title: "Gate",
-      body: "Industry and plan flags decide which modules load, so one deployment serves verticals with nothing in common.",
+      title: "Database per tenant",
+      body: "The strongest isolation, and the most to operate: migrations, connections and provisioning all multiply.",
     },
   ],
 };

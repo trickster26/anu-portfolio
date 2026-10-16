@@ -4,7 +4,7 @@ import { hero, person } from "../content";
 
 const LINKS = [
   { label: "Work", href: "#work" },
-  { label: "Systems", href: "#systems" },
+  { label: "Writing", href: "#writing" },
   { label: "Experience", href: "#experience" },
 ];
 

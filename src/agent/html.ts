@@ -357,9 +357,10 @@ ${projects
   parts.push(`<section class="mt-16 border-t border-line pt-10">
   <h2 class="font-display text-[1.6rem] font-semibold tracking-[-0.02em] text-text">${escapeHtml(tenancy.headline)}</h2>
   <p class="mt-5 max-w-[68ch] text-[15px] leading-relaxed text-muted">${escapeHtml(tenancy.body)}</p>
-  <ol class="mt-5 list-decimal space-y-2 pl-5 text-[15px] text-muted marker:text-dim">${tenancy.steps
+  <ul class="mt-5 list-disc space-y-2 pl-5 text-[15px] text-muted marker:text-dim">${tenancy.steps
     .map((step) => `<li><strong class="text-text">${escapeHtml(step.title)}.</strong> ${escapeHtml(step.body)}</li>`)
-    .join("")}</ol>
+    .join("")}</ul>
+  <p class="mt-5"><a class="text-accent underline underline-offset-4" href="${tenancy.link.href}">${escapeHtml(tenancy.link.label)}</a></p>
 </section>`);
 
   parts.push(`<section class="mt-16 border-t border-line pt-10">

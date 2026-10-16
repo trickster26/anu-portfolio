@@ -92,7 +92,7 @@ export function homeMarkdown(): string {
   for (const step of tenancy.steps) {
     lines.push(`- **${step.title}:** ${step.body}`);
   }
-  lines.push("");
+  lines.push("", `[${tenancy.link.label}](${url(tenancy.link.href)})`, "");
 
   lines.push("## Experience", "");
   for (const role of experience) {
