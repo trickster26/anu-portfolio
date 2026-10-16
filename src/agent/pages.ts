@@ -35,6 +35,8 @@ export type AgentPage = {
   updated: string;
   /** Set on posts under /writing: renders as a BlogPosting authored by #person. */
   published?: string;
+  /** 1200x630 diagram from scripts/diagrams: article figure and link preview. */
+  image?: { src: string; alt: string };
 };
 
 const UPDATED = "2026-10-16";
@@ -252,6 +254,10 @@ export const tenancyPost: AgentPage = {
   lede: "Every SaaS product has to decide where one customer's data stops and the next one's starts. There are three common answers. On a good day they look much the same. They differ in what happens on a bad one.",
   updated: "2026-10-16",
   published: "2026-10-16",
+  image: {
+    src: "/writing/multi-tenant-architecture.png",
+    alt: "Diagram of three multi-tenant models: one shared schema with tenant rows mixed, separate schemas on one server, and a separate database per tenant, from cheaper to run to stronger isolation.",
+  },
   sections: [
     {
       heading: "The three models",
@@ -381,6 +387,10 @@ export const approvalPost: AgentPage = {
   lede: "Most agent demos add a human by putting a confirm button at the end. By then the agent has already sent the email or written the row. A useful approval gate sits inside the loop, right before the one step that changes the outside world.",
   updated: "2026-10-16",
   published: "2026-10-16",
+  image: {
+    src: "/writing/human-in-the-loop-ai-agents.png",
+    alt: "Flow: agent plans, read tools run freely, agent wants to write, approval gate pauses and saves the exact call, human approves, edits or rejects, action executes once with an idempotency key.",
+  },
   sections: [
     {
       heading: "Gate side effects, not answers",
@@ -490,6 +500,10 @@ export const toolsPost: AgentPage = {
   lede: "When an agent misbehaves, the usual reaction is to rewrite the system prompt. Most of the time the problem is the tools: what they're called, what they accept, and what they say back when something goes wrong.",
   updated: "2026-10-16",
   published: "2026-10-16",
+  image: {
+    src: "/writing/agentic-ai-tool-design.png",
+    alt: "An unhelpful tool error, {\"error\": \"not found\"}, next to an error that tells the agent what to try next, plus limits enforced in the loop: max steps, tool timeouts, token budget.",
+  },
   sections: [
     {
       heading: "The model only sees names and descriptions",
@@ -578,6 +592,10 @@ export const ragPost: AgentPage = {
   lede: "When a RAG system gives a wrong answer, the model usually isn't the problem. It answered from the chunks it was given, and the right chunk wasn't among them. Fix retrieval and most of the bad answers go away.",
   updated: "2026-10-16",
   published: "2026-10-16",
+  image: {
+    src: "/writing/rag-retrieval-hybrid-search.png",
+    alt: "RAG retrieval flow: query, permission and metadata filter, keyword BM25 and vector search in parallel, reciprocal rank fusion, rerank top 50 to top 5, then the LLM.",
+  },
   sections: [
     {
       heading: "Measure retrieval on its own",
@@ -673,6 +691,10 @@ export const multiAgentPost: AgentPage = {
   lede: "Splitting one agent into several is one of the most popular moves in agent design, and often the most expensive one. It helps in a specific situation. Outside it, you pay more for a system that's harder to debug.",
   updated: "2026-10-16",
   published: "2026-10-16",
+  image: {
+    src: "/writing/multi-agent-systems.png",
+    alt: "An orchestrator agent delegating to three worker agents, each with its own context, with the costs: about 15 times the tokens of a chat, and five 95% handoffs giving 77% reliability.",
+  },
   sections: [
     {
       heading: "What multiple agents actually buy",
@@ -753,6 +775,10 @@ export const evalsPost: AgentPage = {
   lede: "Without evals, every prompt change is a guess. You fix the example in front of you and quietly break three you aren't looking at. An eval set turns that guess into a number you can watch.",
   updated: "2026-10-16",
   published: "2026-10-16",
+  image: {
+    src: "/writing/llm-evaluation-llm-as-a-judge.png",
+    alt: "Eval pipeline: real failures, code checks, LLM judge with a pass/fail rubric, calibration against hand labels, run in CI on every change.",
+  },
   sections: [
     {
       heading: "Start from real failures",

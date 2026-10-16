@@ -61,6 +61,8 @@ function shell(options: {
   body: string;
   assets: Assets;
   noindex?: boolean;
+  /** Absolute URL of the link-preview image. Defaults to the site card. */
+  image?: string;
 }): string {
   const { title, description, canonical, markdownHref, structuredData, body, assets } = options;
 
@@ -85,14 +87,14 @@ function shell(options: {
     <meta name="author" content="${escapeHtml(person.name)}" />
     <meta name="robots" content="${options.noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1"}" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="${options.image ? "article" : "website"}" />
     <meta property="og:url" content="${escapeHtml(canonical)}" />
     <meta property="og:title" content="${escapeHtml(title)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
-    <meta property="og:image" content="${SITE_ORIGIN}/og.jpg" />
+    <meta property="og:image" content="${escapeHtml(options.image ?? `${SITE_ORIGIN}/og.jpg`)}" />
     <meta property="og:site_name" content="${escapeHtml(person.name)}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="${SITE_ORIGIN}/og.jpg" />
+    <meta name="twitter:image" content="${escapeHtml(options.image ?? `${SITE_ORIGIN}/og.jpg`)}" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     ${FONT_PRELOADS}
@@ -182,7 +184,7 @@ function pageStructuredData(page: AgentPage): unknown[] {
         dateModified: page.updated,
         author: { "@type": "Person", "@id": `${SITE_ORIGIN}/#person`, name: person.name, url: SITE_ORIGIN },
         isPartOf: { "@type": "WebSite", "@id": `${SITE_ORIGIN}/#website` },
-        image: `${SITE_ORIGIN}/og.jpg`,
+        image: page.image ? url(page.image.src) : `${SITE_ORIGIN}/og.jpg`,
       },
     ];
   }
@@ -226,7 +228,11 @@ ${section.blocks.map((block) => `          ${renderBlockHtml(block)}`).join("\n"
               ? `\n          <p class="mt-5 text-[14px] text-dim"><a class="text-text hover:text-accent" href="/">${escapeHtml(person.name)}</a>, <time datetime="${escapeHtml(page.published)}">${escapeHtml(page.published)}</time></p>`
               : ""
           }
-          <p class="mt-8 text-[17px] leading-relaxed text-text/90 sm:text-lg">${linkify(page.lede)}</p>
+          <p class="mt-8 text-[17px] leading-relaxed text-text/90 sm:text-lg">${linkify(page.lede)}</p>${
+            page.image
+              ? `\n          <figure class="mt-10"><img class="w-full rounded-[12px] border border-line" src="${escapeHtml(page.image.src)}" alt="${escapeHtml(page.image.alt)}" width="1200" height="630" fetchpriority="high" /></figure>`
+              : ""
+          }
 
 ${sections}
 
@@ -246,6 +252,7 @@ ${sections}
     structuredData: pageStructuredData(page),
     body,
     assets,
+    image: page.image ? url(page.image.src) : undefined,
   });
 }
 

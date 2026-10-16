@@ -335,6 +335,8 @@ describe("writing posts", () => {
     expect(html).toContain("<pre");
     expect(html).toContain("current_setting('app.tenant_id')");
     expect(html).toContain('<time datetime="2026-10-16">');
+    expect(html).toContain('og:image" content="https://anukumar.site/writing/multi-tenant-architecture.png"');
+    expect(html).toContain('<img class="w-full');
     expect(pageMarkdown(tenancyPost)).toContain("```\nALTER TABLE invoices");
   });
 });

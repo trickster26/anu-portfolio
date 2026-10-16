@@ -1,0 +1,183 @@
+<!doctype html>
+<!--
+  Post diagrams. Rendered to PNG by scripts/diagrams/render.mjs with headless
+  Chrome: ?d=<slug> picks the diagram, ?step=<n> highlights one node (GIF frames).
+  Landscape renders feed the site and link previews; portrait renders are for
+  LinkedIn, where a 4:5 image takes more of the feed.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: "Clash Display"; src: url("../../public/fonts/ClashDisplay-Variable.woff2") format("woff2"); font-weight: 200 700; }
+  @font-face { font-family: "Satoshi"; src: url("../../public/fonts/Satoshi-Variable.woff2") format("woff2"); font-weight: 300 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url("../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 800; }
+
+  :root {
+    --bg: #08090c; --surface: #0e1015; --surface-2: #14171e; --line: #1e222b; --line-bright: #2b313d;
+    --text: #e8eaee; --muted: #8a9099; --dim: #7d838d; --accent: #ffb020; --accent-dim: #b57a14;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: "Satoshi", sans-serif; -webkit-font-smoothing: antialiased; }
+  body { display: flex; flex-direction: column; padding: 56px 64px 44px; gap: 36px; overflow: hidden; }
+  h1 { font-family: "Clash Display", sans-serif; font-weight: 600; font-size: 46px; line-height: 1.04; letter-spacing: -0.025em; max-width: 22ch; }
+  h1 em { font-style: normal; color: var(--accent); }
+  .stage { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  footer { display: flex; justify-content: space-between; align-items: center; font-family: "JetBrains Mono", monospace; font-size: 17px; color: var(--dim); }
+  footer b { color: var(--text); font-weight: 500; font-family: "Clash Display", sans-serif; font-size: 19px; letter-spacing: -0.01em; }
+
+  .row { display: flex; align-items: center; gap: 14px; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .node { border: 1.5px solid var(--line-bright); background: var(--surface); border-radius: 12px; padding: 14px 18px; text-align: center; min-width: 120px; }
+  .node .t { font-family: "Clash Display", sans-serif; font-weight: 500; font-size: 23px; letter-spacing: -0.01em; }
+  .node .s { margin-top: 5px; font-size: 16px; color: var(--muted); line-height: 1.35; }
+  .node.hot { border-color: var(--accent); background: #1a1406; }
+  .node.hot .t { color: var(--accent); }
+  .node.on { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,176,32,.18); }
+  .node.on .t { color: var(--accent); }
+  .mono { font-family: "JetBrains Mono", monospace; }
+  .arrow { flex: none; color: var(--line-bright); }
+  .note { font-size: 17px; color: var(--muted); line-height: 1.4; }
+  .note b { color: var(--text); font-weight: 600; }
+  .pill { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 14px; color: var(--muted); border: 1px solid var(--line-bright); border-radius: 999px; padding: 4px 12px; }
+
+  /* tenancy */
+  .tenancy { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; width: 100%; }
+  .model { border-top: 1.5px solid var(--line-bright); padding-top: 18px; }
+  .model .t { font-family: "Clash Display", sans-serif; font-size: 24px; font-weight: 500; }
+  .model .s { font-size: 16px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+  .db { margin-top: 18px; border: 1.5px solid var(--line-bright); border-radius: 12px; padding: 10px; background: var(--surface); display: flex; flex-direction: column; gap: 6px; }
+  .db .r { height: 14px; border-radius: 4px; background: var(--surface-2); display: flex; align-items: center; padding-left: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 99px; }
+  .a { background: var(--accent); } .b { background: #e8eaee; } .c { background: #5c626c; }
+  .dbs { display: flex; gap: 8px; margin-top: 18px; }
+  .dbs .db { flex: 1; margin-top: 0; }
+  .server { margin-top: 18px; border: 1.5px dashed var(--line-bright); border-radius: 14px; padding: 8px; display: flex; gap: 8px; }
+  .server .db { flex: 1; margin-top: 0; }
+  .scale { grid-column: 1 / -1; display: flex; justify-content: space-between; font-family: "JetBrains Mono", monospace; font-size: 15px; color: var(--dim); border-top: 1px solid var(--line); padding-top: 12px; }
+
+  /* tools */
+  .errs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
+  .err { border: 1.5px solid var(--line-bright); border-radius: 12px; padding: 20px; background: var(--surface); }
+  .err.good { border-color: var(--accent); }
+  .err .k { font-family: "Clash Display", sans-serif; font-size: 20px; font-weight: 500; margin-bottom: 12px; }
+  .err.good .k { color: var(--accent); }
+  .err pre { font-family: "JetBrains Mono", monospace; font-size: 16px; line-height: 1.5; white-space: pre-wrap; color: var(--text); }
+  .err .then { margin-top: 12px; font-size: 16px; color: var(--muted); }
+  .limits { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .par { display: flex; flex-direction: column; gap: 10px; }
+
+  @media (orientation: portrait) {
+    body { padding: 80px 72px 60px; gap: 48px; }
+    h1 { font-size: 64px; max-width: 18ch; }
+    footer { font-size: 20px; } footer b { font-size: 23px; }
+    .flow { flex-direction: column; gap: 10px; }
+    .flow .arrow { transform: rotate(90deg); }
+    .node { min-width: 480px; padding: 18px 26px; border-radius: 14px; }
+    .node .t { font-size: 31px; }
+    .node .s { font-size: 21px; margin-top: 6px; }
+    .par { flex-direction: row; gap: 14px; }
+    .par .node { min-width: 233px; }
+    .note { font-size: 23px; text-align: center; }
+    .pill { font-size: 19px; padding: 7px 16px; }
+    .tenancy, .errs { grid-template-columns: 1fr; gap: 30px; }
+    .model .t { font-size: 32px; } .model .s { font-size: 21px; }
+    .db .r { height: 18px; }
+    .scale { font-size: 19px; }
+    .err { padding: 26px; } .err .k { font-size: 28px; } .err pre { font-size: 23px; } .err .then { font-size: 21px; }
+    .workers .node { min-width: 280px; }
+    .tree { width: 100%; }
+  }
+  @media (orientation: landscape) { .tall-only { display: none; } }
+</style>
+</head>
+<body>
+<h1 id="title"></h1>
+<div class="stage" id="stage"></div>
+<footer><b>Anu Kumar</b><span id="url"></span></footer>
+
+<script>
+const q = new URLSearchParams(location.search);
+const slug = q.get("d");
+const step = q.has("step") ? Number(q.get("step")) : -1;
+const arrow = `<svg class="arrow" width="34" height="16" viewBox="0 0 34 16"><path d="M0 8h30M24 2l7 6-7 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+const node = (t, s = "", cls = "") => `<div class="node ${cls}"><div class="t">${t}</div>${s ? `<div class="s">${s}</div>` : ""}</div>`;
+const flow = (nodes) => `<div class="row flow">${nodes.join(arrow)}</div>`;
+const rows = (n, colours) => Array.from({ length: n }, (_, i) => `<div class="r"><span class="dot ${colours[i % colours.length]}"></span></div>`).join("");
+
+const D = {
+  "multi-tenant-architecture": {
+    title: "Shared schema or a <em>database per tenant</em>?",
+    html: `<div class="tenancy">
+      <div class="model"><div class="t">Shared schema</div><div class="s">One set of tables, a tenant_id on every row</div>
+        <div class="db">${rows(6, ["a", "b", "c"])}</div></div>
+      <div class="model"><div class="t">Schema per tenant</div><div class="s">Separate tables on one server</div>
+        <div class="server"><div class="db">${rows(3, ["a"])}</div><div class="db">${rows(3, ["b"])}</div><div class="db">${rows(3, ["c"])}</div></div></div>
+      <div class="model"><div class="t">Database per tenant</div><div class="s">A database each, sometimes a process each</div>
+        <div class="dbs"><div class="db">${rows(3, ["a"])}</div><div class="db">${rows(3, ["b"])}</div><div class="db">${rows(3, ["c"])}</div></div></div>
+      <div class="scale"><span>cheaper to run</span><span>stronger isolation</span></div>
+    </div>`,
+  },
+  "human-in-the-loop-ai-agents": {
+    title: "Put the approval gate <em>before the side effect</em>",
+    nodes: [
+      ["Agent plans", "next step"],
+      ["Read tools", "run freely"],
+      ["Wants to write", "send, update, pay"],
+      ["Gate", "pause, save the exact call", "hot"],
+      ["Human", "approve, edit or reject"],
+      ["Execute once", "idempotency key"],
+    ],
+  },
+  "agentic-ai-tool-design": {
+    title: "Agents fail at the <em>tools</em>, not the prompt",
+    html: `<div class="errs">
+      <div class="err"><div class="k">Unhelpful error</div><pre>{"error": "not found"}</pre><div class="then">Agent retries the same call, or guesses.</div></div>
+      <div class="err good"><div class="k">Error that teaches</div><pre>No customer with that email.
+The domain may be misspelled.
+Try search_customers by name
+or phone.</pre><div class="then">Agent knows what to do next.</div></div>
+      <div class="limits"><span class="note"><b>Limits live in the loop, not the prompt:</b></span><span class="pill">max steps</span><span class="pill">tool timeouts</span><span class="pill">token budget</span></div>
+    </div>`,
+  },
+  "rag-retrieval-hybrid-search": {
+    title: "Most wrong RAG answers are <em>retrieval</em> failures",
+    html: `<div class="col" style="gap:22px">
+      <div class="row flow">${node("Query")}${arrow}${node("Filter first", "permissions, metadata")}${arrow}
+        <div class="par">${node("Keyword", "BM25")}${node("Vector", "embeddings")}</div>${arrow}
+        ${node("Merge", "reciprocal rank fusion")}${arrow}${node("Rerank", "top 50 to top 5", "hot")}${arrow}${node("LLM")}</div>
+      <div class="note">Measure <b>recall@k</b> on real questions before touching the prompt.</div>
+    </div>`,
+  },
+  "multi-agent-systems": {
+    title: "More agents, <em>more cost</em>: split only when it pays",
+    html: `<div class="col" style="gap:20px">
+      ${node("Orchestrator", "plans, delegates, combines", "hot")}
+      <svg class="arrow tree" height="34" viewBox="0 0 520 34" preserveAspectRatio="none" style="max-width:640px;min-width:420px"><path d="M260 0v12M80 12h360M80 12v22M260 12v22M440 12v22" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>
+      <div class="row workers" style="gap:20px">${node("Worker", "own context")}${node("Worker", "own context")}${node("Worker", "own context")}</div>
+      <div class="row" style="gap:12px;margin-top:10px;flex-wrap:wrap;justify-content:center">
+        <span class="pill">~15x tokens of a chat (Anthropic)</span><span class="pill">5 handoffs at 95% each = 77%</span></div>
+    </div>`,
+  },
+  "llm-evaluation-llm-as-a-judge": {
+    title: "Evals that <em>catch regressions</em>",
+    nodes: [
+      ["Real failures", "50 to 200 cases"],
+      ["Code checks", "JSON, tool, citations"],
+      ["LLM judge", "pass/fail rubric"],
+      ["Calibrate", "vs hand labels", "hot"],
+      ["Run in CI", "every change"],
+    ],
+  },
+};
+
+const d = D[slug];
+document.getElementById("title").innerHTML = d.title;
+document.getElementById("url").textContent = `anukumar.site/writing/${slug}`;
+document.getElementById("stage").innerHTML = d.html ?? flow(
+  d.nodes.map(([t, s, cls], i) => node(t, s, step === -1 ? (cls ?? "") : i === step ? "on" : "")),
+);
+</script>
+</body>
+</html>
